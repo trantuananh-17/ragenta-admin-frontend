@@ -53,6 +53,9 @@ export function ProviderPanel({ provider }: { provider: ModelProvider }) {
           <Button
             variant="outline"
             size="sm"
+            // A model is only worth adding for a provider the backend can call;
+            // the rest of the list is here to show the shape of the roadmap.
+            disabled={!provider.supported}
             onClick={() => setAddingModel(true)}
           >
             <Plus className="size-4" />

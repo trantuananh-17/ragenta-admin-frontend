@@ -1,40 +1,30 @@
 "use client";
 
-import { Ticket } from "lucide-react";
+import { AlertCircle, Loader2, Ticket } from "lucide-react";
 
 import { DetailSection, DetailShell } from "@/components/detail-shell";
 import { EntityStateView } from "@/components/entity-components";
 import { PageHeader } from "@/components/page-header";
-import { PrototypeNotice } from "@/components/prototype-notice";
 import { StatCard, StatCardGrid } from "@/components/stat-card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { formatCredits } from "@/lib/format";
-import { usePromoCodes } from "../hooks/promo-codes.hook";
+import { usePromoCodesSuspense } from "../hooks/promo-codes.hook";
 import { PromoCodeCreateForm } from "./promo-code-create-form";
 import { PromoCodesTable } from "./promo-codes-table";
-import type { PromoCode } from "../service/promo-codes.service";
-
-function isLive(promoCode: PromoCode): boolean {
-  if (!promoCode.active) return false;
-  if (new Date(promoCode.expiresAt).valueOf() <= Date.now()) return false;
-  return (
-    promoCode.maxRedemptions === null ||
-    promoCode.redemptions.length < promoCode.maxRedemptions
-  );
-}
 
 export function PromoCodesView() {
-  const { data, isPending } = usePromoCodes();
-  const promoCodes = data ?? [];
+  const { data } = usePromoCodesSuspense();
+  const promoCodes = data.items;
 
-  const live = promoCodes.filter(isLive).length;
+  const live = promoCodes.filter((code) => code.status === "active").length;
   const redemptions = promoCodes.reduce(
-    (total, promoCode) => total + promoCode.redemptions.length,
+    (total, code) => total + code.redeemedCount,
     0,
   );
+  // What the codes have handed out, from the code's current value. A code whose
+  // credits were edited after a redemption would make this an approximation —
+  // which is why the redemptions dialog shows the frozen per-redemption amount.
   const granted = promoCodes.reduce(
-    (total, promoCode) =>
-      total + promoCode.redemptions.length * promoCode.credits,
+    (total, code) => total + code.redeemedCount * code.credits,
     0,
   );
 
@@ -42,29 +32,23 @@ export function PromoCodesView() {
     <DetailShell>
       <PageHeader
         title="Promo codes"
-        description="Redeemable codes that grant credits to a workspace. One redemption per workspace."
+        description="Redeemable codes that grant credits to a workspace. One redemption per workspace, posted to the ledger exactly as a top-up is."
       />
-
-      <PrototypeNotice>
-        ragenta-backend has no promo-code module yet, so nothing on this screen
-        crosses the network. What you create lives in this browser tab and is
-        gone on reload.
-      </PrototypeNotice>
 
       <StatCardGrid>
         <StatCard
           label="Redeemable now"
-          value={isPending ? "—" : live}
-          hint={`${promoCodes.length} total`}
+          value={live}
+          hint={`${data.total} total`}
         />
         <StatCard
           label="Redemptions"
-          value={isPending ? "—" : redemptions}
+          value={redemptions}
           hint="Across every code"
         />
         <StatCard
           label="Credits granted"
-          value={isPending ? "—" : formatCredits(granted)}
+          value={formatCredits(granted)}
           hint="What redemptions have handed out"
         />
       </StatCardGrid>
@@ -73,19 +57,9 @@ export function PromoCodesView() {
 
       <DetailSection
         title="All codes"
-        description={
-          isPending
-            ? "Loading..."
-            : `${promoCodes.length} code${promoCodes.length === 1 ? "" : "s"}. Select a row to see who redeemed it.`
-        }
+        description={`${data.total} code${data.total === 1 ? "" : "s"}. Select a row to see who redeemed it.`}
       >
-        {isPending ? (
-          <div className="space-y-2">
-            <Skeleton className="h-9 w-full" />
-            <Skeleton className="h-9 w-full" />
-            <Skeleton className="h-9 w-full" />
-          </div>
-        ) : promoCodes.length === 0 ? (
+        {promoCodes.length === 0 ? (
           <EntityStateView
             icon={<Ticket />}
             title="No promo codes"
@@ -96,5 +70,23 @@ export function PromoCodesView() {
         )}
       </DetailSection>
     </DetailShell>
+  );
+}
+
+export function PromoCodesLoading() {
+  return (
+    <div className="flex h-full items-center justify-center">
+      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+    </div>
+  );
+}
+
+export function PromoCodesError() {
+  return (
+    <EntityStateView
+      icon={<AlertCircle className="size-8 text-destructive" />}
+      title="Could not load promo codes"
+      message="The backend refused or is unreachable."
+    />
   );
 }

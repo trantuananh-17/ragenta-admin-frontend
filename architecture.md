@@ -147,20 +147,21 @@ renders immediately without a second fetch.
 screens use `detail-shell.tsx` (`DetailShell`, `DetailSection`, `DetailList`).
 Cross-cutting pieces: `locale-tabs`, `status-badge`, `confirm-dialog`,
 `stat-card`, `markdown-preview`, `tag-input`, `copy-button`,
-`content-status-filter`, `prototype-notice`.
+`content-status-filter`.
 
-### Prototype screens
+### Every screen reads a backend
 
-Two modules — `promo-codes` and `model-providers` — are UI ahead of the backend.
-They keep the module shape, but their `service/` holds a fixture and a
-module-level store instead of a `ky` call, they use `useQuery` rather than
-`useSuspenseQuery` (there is no prefetch to hydrate from), and their page has no
-`HydrationBoundary`. Every one of them renders `PrototypeNotice` at the top, so
-an admin can tell a screen that failed to save from one that was never able to.
+`promo-codes` and `model-providers` shipped in `v0.1.1rc1` as fixtures behind a
+`PrototypeNotice`. Both were wired to the real admin API on 2026-09-05 and the
+notice component is gone — no module here holds a store any more. They follow
+the same shape as the rest: `service/` calls through `api`, `server/prefetch.ts`
+warms the cache, and the page hydrates behind a `Suspense` boundary.
 
-Making either real is a one-file change: replace the function bodies in
-`service/` with calls through `api` and delete the store. The endpoints each one
-expects are named in its service header.
+`model-providers` is the one screen that makes a call whose latency is somebody
+else's: **Test connection** posts to
+`/v1/admin/providers/:provider/check`, which reaches the provider. A rejected
+key comes back as `200 { ok: false }`, not an error — "your key is refused" is
+the answer to the question, and an error banner would hide it.
 
 `promo-codes` deliberately drops the per-grant expiry the reference console
 offers — `credit_balance` expires nothing, so the field would promise what the

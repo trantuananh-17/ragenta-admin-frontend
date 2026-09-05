@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAddCustomModel } from "../hooks/model-providers.hook";
+import { useUpsertModel } from "../hooks/model-providers.hook";
 import type { ModelProvider } from "../service/model-providers.service";
 
 const schema = z.object({
@@ -33,9 +33,20 @@ const schema = z.object({
   capability: z.enum(["chat", "embedding"]),
   tier: z.enum(["economy", "premium"]),
   contextWindow: z.number().int().positive().optional(),
+  embeddingDimensions: z.number().int().positive().optional(),
   inputPerMillion: z.number().nonnegative(),
   outputPerMillion: z.number().nonnegative(),
   embeddingPerMillion: z.number().nonnegative(),
+}).superRefine((values, ctx) => {
+  // Without the vector width the backend cannot pick a Qdrant collection, and
+  // indexing would fail on the first document rather than here.
+  if (values.capability === "embedding" && !values.embeddingDimensions) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["embeddingDimensions"],
+      message: "An embedding model needs its vector width.",
+    });
+  }
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -45,6 +56,7 @@ const defaults: FormValues = {
   capability: "chat",
   tier: "premium",
   contextWindow: undefined,
+  embeddingDimensions: undefined,
   inputPerMillion: 0,
   outputPerMillion: 0,
   embeddingPerMillion: 0,
@@ -63,7 +75,7 @@ export function AddModelDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const add = useAddCustomModel(provider.id);
+  const add = useUpsertModel(provider.id);
 
   const {
     register,
@@ -107,6 +119,7 @@ export function AddModelDialog({
                 capability: values.capability,
                 tier: values.tier,
                 contextWindow: values.contextWindow ?? null,
+                embeddingDimensions: values.embeddingDimensions ?? null,
                 rates: {
                   inputPerMillion: values.inputPerMillion,
                   outputPerMillion: values.outputPerMillion,
@@ -213,15 +226,40 @@ export function AddModelDialog({
               </div>
             </div>
           ) : (
-            <div className="grid gap-2">
-              <Label htmlFor="model-embedding-rate">Embedding $/M</Label>
-              <Input
-                id="model-embedding-rate"
-                type="number"
-                step="0.001"
-                min={0}
-                {...register("embeddingPerMillion", { valueAsNumber: true })}
-              />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="model-dimensions">Vector width</Label>
+                <Input
+                  id="model-dimensions"
+                  type="number"
+                  step={1}
+                  min={1}
+                  placeholder="1536"
+                  {...register("embeddingDimensions", {
+                    setValueAs: (value: string) =>
+                      value === "" ? undefined : Number(value),
+                  })}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Decides which vector collection its embeddings land in. Wrong
+                  here means indexing fails, not that retrieval degrades.
+                </p>
+                {errors.embeddingDimensions && (
+                  <p className="text-sm text-destructive">
+                    {errors.embeddingDimensions.message}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="model-embedding-rate">Embedding $/M</Label>
+                <Input
+                  id="model-embedding-rate"
+                  type="number"
+                  step="0.001"
+                  min={0}
+                  {...register("embeddingPerMillion", { valueAsNumber: true })}
+                />
+              </div>
             </div>
           )}
         </form>

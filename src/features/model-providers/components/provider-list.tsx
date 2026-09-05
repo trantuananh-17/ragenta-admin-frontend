@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ChevronRight, Search, SlidersHorizontal } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { ModelProvider } from "../service/model-providers.service";
 
@@ -13,12 +12,10 @@ export type ProviderSelection = string | null;
 
 export function ProviderList({
   providers,
-  isPending,
   selection,
   onSelect,
 }: {
   providers: ModelProvider[];
-  isPending: boolean;
   selection: ProviderSelection;
   onSelect: (selection: ProviderSelection) => void;
 }) {
@@ -68,13 +65,7 @@ export function ProviderList({
       </div>
 
       <div className="flex flex-col gap-1 overflow-y-auto">
-        {isPending ? (
-          <>
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </>
-        ) : ordered.length === 0 ? (
+        {ordered.length === 0 ? (
           <p className="px-3 py-6 text-center text-sm text-muted-foreground">
             No provider matches “{search}”.
           </p>

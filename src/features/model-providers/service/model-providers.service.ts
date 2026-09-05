@@ -1,26 +1,30 @@
-/**
- * Model providers and their credentials — **UI only**. Nothing here crosses the
- * network, and a reload restores the fixture below.
- *
- * It is a prototype for a capability the platform does not have yet, and the gap
- * is worth stating precisely. Today `ragenta-backend` reads provider keys from
- * environment variables (`src/ai/providers.ts`) and ships its catalogue as a
- * TypeScript table (`src/ai/models.ts`) — so there is no key to edit and no
- * model row to toggle. Making this screen real means both move into the database
- * behind an admin API, with the key encrypted at rest and never returned.
- *
- * That last part is already honoured here: a key is write-only. What comes back
- * is a masked hint, which is all any response should ever carry.
- *
- * The three supported providers and their models mirror the real catalogue
- * exactly, so the numbers on screen are the numbers that bill. The rest of the
- * list is providers a platform would plausibly reach for next; they carry no
- * models, because inventing prices for models nobody has integrated would put
- * fiction where an admin expects rates.
- */
+import { z } from "zod";
 
-export type ModelCapability = "chat" | "embedding";
-export type ModelTier = "economy" | "premium";
+import { api } from "@/lib/ky";
+
+/**
+ * `/v1/admin/providers` — the provider keys Ragenta calls with, and the model
+ * catalogue those keys unlock.
+ *
+ * Platform-level, not per workspace: Ragenta pays for inference and customers
+ * spend credits, so a key here is the platform's and every workspace calling
+ * that provider bills against it.
+ *
+ * A key is **write-only over the wire**. It is submitted, stored encrypted, and
+ * never returned — what comes back is `hint`, the masked form. That is a
+ * property of the API, not a convenience of this screen: an admin endpoint that
+ * could return a provider key would turn one compromised session into a stolen
+ * credential that outlives it.
+ *
+ * The catalogue is the built-in table in `ragenta-backend/src/ai/models.ts`
+ * merged with the `provider_model` rows written from here, so what is on screen
+ * is what the backend will actually price and offer.
+ */
+export const modelCapabilitySchema = z.enum(["chat", "embedding"]);
+export const modelTierSchema = z.enum(["economy", "premium"]);
+
+export type ModelCapability = z.infer<typeof modelCapabilitySchema>;
+export type ModelTier = z.infer<typeof modelTierSchema>;
 
 export interface ModelRates {
   /** USD per million tokens. Zero where the capability does not apply. */
@@ -29,307 +33,209 @@ export interface ModelRates {
   embeddingPerMillion: number;
 }
 
-export interface ProviderModel {
-  id: string;
-  model: string;
-  capability: ModelCapability;
-  tier: ModelTier;
-  contextWindow: number | null;
-  rates: ModelRates;
+/**
+ * The backend names these `input` / `output` / `embedding`, next to the model
+ * they belong to. The longer names here say the unit, which matters on a screen
+ * where somebody is typing a price in.
+ */
+const ratesSchema = z
+  .object({
+    input: z.number(),
+    output: z.number(),
+    embedding: z.number(),
+  })
+  .transform(
+    (rates): ModelRates => ({
+      inputPerMillion: rates.input,
+      outputPerMillion: rates.output,
+      embeddingPerMillion: rates.embedding,
+    }),
+  );
+
+export const providerModelSchema = z.object({
+  id: z.string(),
+  provider: z.string(),
+  model: z.string(),
+  capability: modelCapabilitySchema,
+  tier: modelTierSchema,
+  contextWindow: z.number().nullable(),
+  /** Embedding models only. It decides which vector collection they index into. */
+  embeddingDimensions: z.number().nullable(),
+  rates: ratesSchema,
   /** Off means no workspace can select it, whatever their plan allows. */
-  enabled: boolean;
-  /** Added through this screen rather than shipped in the backend catalogue. */
-  custom: boolean;
-}
+  enabled: z.boolean(),
+  /** Stored in `provider_model` rather than compiled into the backend catalogue. */
+  custom: z.boolean(),
+});
 
-export interface ProviderCredential {
-  configured: boolean;
-  /** Masked. The stored key is never returned by an API and never shown here. */
-  hint: string | null;
+export const providerCredentialSchema = z.object({
+  configured: z.boolean(),
+  /** Masked. The stored key is never returned by the API and never shown here. */
+  hint: z.string().nullable(),
   /** Set only for providers reached through a self-hosted or regional endpoint. */
-  baseUrl: string | null;
-  updatedAt: string | null;
-  updatedBy: string | null;
-}
+  baseUrl: z.string().nullable(),
+  updatedAt: z.string().nullable(),
+  /** The result of the last live call made from the "Test connection" button. */
+  lastCheckedAt: z.string().nullable(),
+  lastCheckOk: z.boolean().nullable(),
+  lastCheckError: z.string().nullable(),
+});
 
-export interface ModelProvider {
-  id: string;
-  name: string;
-  description: string;
-  /** Whether ragenta-backend can call this provider today. */
-  supported: boolean;
-  credential: ProviderCredential;
-  models: ProviderModel[];
-}
+export const modelProviderSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  /** Whether ragenta-backend has a client for this provider at all. */
+  supported: z.boolean(),
+  /** What the key looks like, shown as a placeholder. */
+  keyHint: z.string(),
+  /** True for providers with no default host — a self-hosted server. */
+  requiresBaseUrl: z.boolean(),
+  defaultBaseUrl: z.string().nullable(),
+  credential: providerCredentialSchema,
+  models: z.array(providerModelSchema),
+});
 
-export interface ModelSelection {
-  provider: string;
-  model: string;
-}
+export const modelSelectionSchema = z.object({
+  provider: z.string(),
+  model: z.string(),
+});
 
-export interface PlatformModelDefaults {
-  chat: ModelSelection;
-  embedding: ModelSelection;
-}
+export const platformDefaultsSchema = z.object({
+  chat: modelSelectionSchema,
+  embedding: modelSelectionSchema,
+});
+
+export const providersResponseSchema = z.object({
+  defaults: platformDefaultsSchema,
+  /**
+   * False when `SECRETS_ENCRYPTION_KEY` is unset. The backend then refuses to
+   * store a key rather than writing one in the clear, and the screen has to say
+   * so — otherwise saving looks broken for a reason nobody can see.
+   */
+  encryptionConfigured: z.boolean(),
+  providers: z.array(modelProviderSchema),
+});
+
+export const checkResultSchema = z.object({
+  ok: z.boolean(),
+  checkedAt: z.string(),
+  detail: z.string(),
+  models: z.array(z.string()).optional(),
+});
+
+export type ProviderModel = z.infer<typeof providerModelSchema>;
+export type ProviderCredential = z.infer<typeof providerCredentialSchema>;
+export type ModelProvider = z.infer<typeof modelProviderSchema>;
+export type ModelSelection = z.infer<typeof modelSelectionSchema>;
+export type PlatformModelDefaults = z.infer<typeof platformDefaultsSchema>;
+export type ProvidersResponse = z.infer<typeof providersResponseSchema>;
+export type CheckResult = z.infer<typeof checkResultSchema>;
 
 export interface SaveProviderKeyInput {
   apiKey: string;
   baseUrl: string | null;
 }
 
-export interface AddCustomModelInput {
+export interface UpsertModelInput {
   model: string;
   capability: ModelCapability;
   tier: ModelTier;
   contextWindow: number | null;
+  embeddingDimensions: number | null;
   rates: ModelRates;
 }
 
-const CURRENT_ACTOR = "admin@ragenta.cloud";
-
-/**
- * What a masked hint looks like. Enough to tell two keys apart on sight,
- * nowhere near enough to use one.
- */
-export function maskKey(apiKey: string): string {
-  const trimmed = apiKey.trim();
-  if (trimmed.length <= 8) return "••••";
-  return `${trimmed.slice(0, 3)}••••${trimmed.slice(-4)}`;
-}
-
-function chat(
-  model: string,
-  tier: ModelTier,
-  contextWindow: number,
-  input: number,
-  output: number,
-  enabled = true,
-): ProviderModel {
-  return {
-    id: model,
-    model,
-    capability: "chat",
-    tier,
-    contextWindow,
-    rates: {
-      inputPerMillion: input,
-      outputPerMillion: output,
-      embeddingPerMillion: 0,
-    },
-    enabled,
-    custom: false,
-  };
-}
-
-function embedding(model: string, rate: number): ProviderModel {
-  return {
-    id: model,
-    model,
-    capability: "embedding",
-    tier: "economy",
-    contextWindow: null,
-    rates: {
-      inputPerMillion: 0,
-      outputPerMillion: 0,
-      embeddingPerMillion: rate,
-    },
-    enabled: true,
-    custom: false,
-  };
-}
-
-/** A provider Ragenta has no adapter for: listed, selectable, but inert. */
-function available(
-  id: string,
-  name: string,
-  description: string,
-): ModelProvider {
-  return {
-    id,
-    name,
-    description,
-    supported: false,
-    credential: {
-      configured: false,
-      hint: null,
-      baseUrl: null,
-      updatedAt: null,
-      updatedBy: null,
-    },
-    models: [],
-  };
-}
-
-let providers: ModelProvider[] = [
-  {
-    id: "anthropic",
-    name: "Anthropic",
-    description: "Claude. The default chat provider.",
-    supported: true,
-    credential: {
-      configured: true,
-      hint: "sk-••••9f31",
-      baseUrl: null,
-      updatedAt: "2026-08-28T09:14:00.000Z",
-      updatedBy: CURRENT_ACTOR,
-    },
-    models: [
-      chat("claude-opus-5", "premium", 200_000, 15, 75),
-      chat("claude-sonnet-5", "premium", 200_000, 3, 15),
-      chat("claude-haiku-4-5", "economy", 200_000, 1, 5),
-    ],
-  },
-  {
-    id: "openai",
-    name: "OpenAI",
-    description: "GPT and the embedding models the ingestion pipeline runs on.",
-    supported: true,
-    credential: {
-      configured: true,
-      hint: "sk-••••02ac",
-      baseUrl: null,
-      updatedAt: "2026-08-28T09:16:00.000Z",
-      updatedBy: CURRENT_ACTOR,
-    },
-    models: [
-      chat("gpt-4o", "premium", 128_000, 2.5, 10),
-      chat("gpt-4o-mini", "economy", 128_000, 0.15, 0.6),
-      embedding("text-embedding-3-small", 0.02),
-      embedding("text-embedding-3-large", 0.13),
-    ],
-  },
-  {
-    id: "google",
-    name: "Google",
-    description: "Gemini. The long-context option — a million tokens.",
-    supported: true,
-    credential: {
-      configured: false,
-      hint: null,
-      baseUrl: null,
-      updatedAt: null,
-      updatedBy: null,
-    },
-    models: [
-      chat("gemini-2.5-pro", "premium", 1_000_000, 1.25, 10),
-      chat("gemini-2.5-flash", "economy", 1_000_000, 0.3, 2.5),
-    ],
-  },
-  available(
-    "azure-openai",
-    "Azure OpenAI",
-    "The same OpenAI models under an Azure deployment and its own endpoint.",
-  ),
-  available("mistral", "Mistral", "Open-weight European models."),
-  available("deepseek", "DeepSeek", "Low-cost reasoning models."),
-  available("groq", "Groq", "Open models served at very low latency."),
-  available("xai", "xAI", "Grok."),
-  available("cohere", "Cohere", "Command, and the Rerank models."),
-  available("voyage", "Voyage AI", "Embedding and reranking only."),
-  available(
-    "ollama",
-    "Ollama",
-    "Models on your own hardware, reached over a base URL.",
-  ),
-];
-
-let defaults: PlatformModelDefaults = {
-  chat: { provider: "anthropic", model: "claude-haiku-4-5" },
-  embedding: { provider: "openai", model: "text-embedding-3-small" },
-};
-
-function replace(id: string, update: (provider: ModelProvider) => ModelProvider) {
-  providers = providers.map((provider) =>
-    provider.id === id ? update(provider) : provider,
-  );
-  const next = providers.find((provider) => provider.id === id);
-  if (!next) throw new Error("That provider no longer exists.");
-  return next;
-}
-
-export async function listProviders(): Promise<ModelProvider[]> {
-  return providers;
+export async function listProviders(): Promise<ProvidersResponse> {
+  const response = await api.get("admin/providers");
+  return providersResponseSchema.parse(await response.json());
 }
 
 export async function getPlatformDefaults(): Promise<PlatformModelDefaults> {
-  return defaults;
-}
-
-export async function saveProviderKey(
-  id: string,
-  input: SaveProviderKeyInput,
-): Promise<ModelProvider> {
-  return replace(id, (provider) => ({
-    ...provider,
-    credential: {
-      configured: true,
-      hint: maskKey(input.apiKey),
-      baseUrl: input.baseUrl,
-      updatedAt: new Date().toISOString(),
-      updatedBy: CURRENT_ACTOR,
-    },
-  }));
-}
-
-export async function removeProviderKey(id: string): Promise<ModelProvider> {
-  return replace(id, (provider) => ({
-    ...provider,
-    credential: {
-      configured: false,
-      hint: null,
-      baseUrl: null,
-      updatedAt: new Date().toISOString(),
-      updatedBy: CURRENT_ACTOR,
-    },
-  }));
-}
-
-export async function setModelEnabled(
-  providerId: string,
-  modelId: string,
-  enabled: boolean,
-): Promise<ModelProvider> {
-  return replace(providerId, (provider) => ({
-    ...provider,
-    models: provider.models.map((model) =>
-      model.id === modelId ? { ...model, enabled } : model,
-    ),
-  }));
-}
-
-export async function addCustomModel(
-  providerId: string,
-  input: AddCustomModelInput,
-): Promise<ModelProvider> {
-  return replace(providerId, (provider) => {
-    if (provider.models.some((model) => model.model === input.model)) {
-      throw new Error(`${provider.name} already lists ${input.model}.`);
-    }
-    return {
-      ...provider,
-      models: [
-        ...provider.models,
-        { id: input.model, ...input, enabled: true, custom: true },
-      ],
-    };
-  });
-}
-
-export async function removeCustomModel(
-  providerId: string,
-  modelId: string,
-): Promise<ModelProvider> {
-  return replace(providerId, (provider) => ({
-    ...provider,
-    models: provider.models.filter(
-      (model) => !(model.id === modelId && model.custom),
-    ),
-  }));
+  const response = await api.get("admin/settings/models");
+  return platformDefaultsSchema.parse(await response.json());
 }
 
 export async function setPlatformDefaults(
   next: PlatformModelDefaults,
 ): Promise<PlatformModelDefaults> {
-  defaults = next;
-  return defaults;
+  const response = await api.put("admin/settings/models", { json: next });
+  return platformDefaultsSchema.parse(await response.json());
+}
+
+export async function saveProviderKey(
+  providerId: string,
+  input: SaveProviderKeyInput,
+): Promise<ProvidersResponse> {
+  const response = await api.put(`admin/providers/${providerId}/credential`, {
+    json: { apiKey: input.apiKey, baseUrl: input.baseUrl },
+  });
+  return providersResponseSchema.parse(await response.json());
+}
+
+export async function removeProviderKey(
+  providerId: string,
+): Promise<ProvidersResponse> {
+  const response = await api.delete(`admin/providers/${providerId}/credential`);
+  return providersResponseSchema.parse(await response.json());
+}
+
+/**
+ * One live call to the provider with the stored key. A rejected key comes back
+ * as `ok: false` with a 200, not as an error — "your key is refused" is the
+ * answer to the question that was asked.
+ */
+export async function checkProvider(providerId: string): Promise<CheckResult> {
+  const response = await api.post(`admin/providers/${providerId}/check`);
+  return checkResultSchema.parse(await response.json());
+}
+
+export async function upsertModel(
+  providerId: string,
+  input: UpsertModelInput,
+): Promise<ProvidersResponse> {
+  const response = await api.post("admin/models", {
+    json: {
+      provider: providerId,
+      model: input.model,
+      capability: input.capability,
+      tier: input.tier,
+      contextWindow: input.contextWindow,
+      embeddingDimensions: input.embeddingDimensions,
+      inputPerMillion: input.rates.inputPerMillion,
+      outputPerMillion: input.rates.outputPerMillion,
+      embeddingPerMillion: input.rates.embeddingPerMillion,
+      enabled: true,
+    },
+  });
+  return providersResponseSchema.parse(await response.json());
+}
+
+export async function setModelEnabled(
+  providerId: string,
+  model: string,
+  enabled: boolean,
+): Promise<ProvidersResponse> {
+  const response = await api.patch(
+    `admin/providers/${providerId}/models/${encodeURIComponent(model)}`,
+    { json: { enabled } },
+  );
+  return providersResponseSchema.parse(await response.json());
+}
+
+/**
+ * Drops the stored row. A model that also exists in the built-in catalogue
+ * reverts to its compiled definition rather than disappearing, which is why the
+ * response says which happened.
+ */
+export async function removeModel(
+  providerId: string,
+  model: string,
+): Promise<{ removed: boolean; revertedToBuiltIn: boolean }> {
+  const response = await api.delete(
+    `admin/providers/${providerId}/models/${encodeURIComponent(model)}`,
+  );
+  return z
+    .object({ removed: z.boolean(), revertedToBuiltIn: z.boolean() })
+    .parse(await response.json());
 }

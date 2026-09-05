@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { KeyRound } from "lucide-react";
+import { CheckCircle2, KeyRound, Loader2, XCircle } from "lucide-react";
 import { z } from "zod";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatDateTime } from "@/lib/format";
 import {
+  useCheckProvider,
   useRemoveProviderKey,
   useSaveProviderKey,
 } from "../hooks/model-providers.hook";
@@ -32,10 +33,41 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+/** The outcome of the last live call, if one has been made. */
+function LastCheck({ provider }: { provider: ModelProvider }) {
+  const { lastCheckedAt, lastCheckOk, lastCheckError } = provider.credential;
+  if (!lastCheckedAt) return null;
+
+  return (
+    <p
+      className={
+        lastCheckOk
+          ? "flex items-start gap-2 text-xs text-emerald-600 dark:text-emerald-400"
+          : "flex items-start gap-2 text-xs text-destructive"
+      }
+    >
+      {lastCheckOk ? (
+        <CheckCircle2 className="mt-px size-3.5 shrink-0" />
+      ) : (
+        <XCircle className="mt-px size-3.5 shrink-0" />
+      )}
+      <span>
+        {lastCheckOk
+          ? `Accepted at ${formatDateTime(lastCheckedAt)}.`
+          : `Rejected at ${formatDateTime(lastCheckedAt)} — ${lastCheckError}`}
+      </span>
+    </p>
+  );
+}
+
 /**
  * A key is write-only here, on purpose. It is submitted, it is never read back,
- * and what stays on screen is the masked hint — which is also all an API should
- * ever return for a stored credential.
+ * and what stays on screen is the masked hint — which is also all the API
+ * returns for a stored credential.
+ *
+ * "Test connection" is the only way to know a key works without waiting for a
+ * customer to hit it. It makes one cheap authenticated call (a model list, not
+ * a generation), so pressing it repeatedly costs nothing.
  */
 export function ProviderCredentialForm({
   provider,
@@ -43,8 +75,9 @@ export function ProviderCredentialForm({
   provider: ModelProvider;
 }) {
   const [confirmingRemoval, setConfirmingRemoval] = useState(false);
-  const save = useSaveProviderKey(provider.id);
-  const remove = useRemoveProviderKey(provider.id);
+  const save = useSaveProviderKey(provider.id, provider.name);
+  const remove = useRemoveProviderKey(provider.id, provider.name);
+  const check = useCheckProvider(provider.id);
 
   const {
     register,
@@ -75,24 +108,39 @@ export function ProviderCredentialForm({
       }
     >
       {credential.configured && (
-        <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-md border bg-muted/40 px-4 py-3 text-sm">
-          <span className="flex items-center gap-2 font-mono">
-            <KeyRound className="size-4 text-muted-foreground" />
-            {credential.hint}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            Updated {formatDateTime(credential.updatedAt)}
-            {credential.updatedBy ? ` by ${credential.updatedBy}` : ""}
-          </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="ml-auto"
-            onClick={() => setConfirmingRemoval(true)}
-          >
-            Remove key
-          </Button>
+        <div className="mb-4 space-y-3 rounded-md border bg-muted/40 px-4 py-3 text-sm">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <span className="flex items-center gap-2 font-mono">
+              <KeyRound className="size-4 text-muted-foreground" />
+              {credential.hint}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Updated {formatDateTime(credential.updatedAt)}
+            </span>
+            <div className="ml-auto flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={!provider.supported || check.isPending}
+                onClick={() => check.mutate()}
+              >
+                {check.isPending && (
+                  <Loader2 className="size-4 animate-spin" />
+                )}
+                Test connection
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setConfirmingRemoval(true)}
+              >
+                Remove key
+              </Button>
+            </div>
+          </div>
+          <LastCheck provider={provider} />
         </div>
       )}
 
@@ -101,10 +149,7 @@ export function ProviderCredentialForm({
         onSubmit={handleSubmit((values) =>
           save.mutate(
             { apiKey: values.apiKey, baseUrl: values.baseUrl || null },
-            {
-              onSuccess: () =>
-                reset({ apiKey: "", baseUrl: values.baseUrl }),
-            },
+            { onSuccess: () => reset({ apiKey: "", baseUrl: values.baseUrl }) },
           ),
         )}
       >
@@ -117,7 +162,7 @@ export function ProviderCredentialForm({
             type="password"
             autoComplete="off"
             spellCheck={false}
-            placeholder="Paste the key"
+            placeholder={provider.keyHint}
             {...register("apiKey")}
           />
           {errors.apiKey && (
@@ -126,16 +171,20 @@ export function ProviderCredentialForm({
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="provider-base-url">Base URL</Label>
+          <Label htmlFor="provider-base-url">
+            Base URL{provider.requiresBaseUrl ? "" : " (optional)"}
+          </Label>
           <Input
             id="provider-base-url"
-            placeholder="Provider default"
+            placeholder={provider.defaultBaseUrl ?? "https://..."}
             autoComplete="off"
             spellCheck={false}
             {...register("baseUrl")}
           />
           <p className="text-xs text-muted-foreground">
-            Only for a self-hosted or regional endpoint.
+            {provider.requiresBaseUrl
+              ? "Required — this provider has no default host."
+              : "Only for a self-hosted or regional endpoint."}
           </p>
           {errors.baseUrl && (
             <p className="text-sm text-destructive">{errors.baseUrl.message}</p>

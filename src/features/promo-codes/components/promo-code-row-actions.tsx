@@ -23,7 +23,7 @@ export function PromoCodeRowActions({ promoCode }: { promoCode: PromoCode }) {
   const setActive = useSetPromoCodeActive();
   const remove = useDeletePromoCode();
 
-  const redeemed = promoCode.redemptions.length > 0;
+  const redeemed = promoCode.redeemedCount > 0;
   const busy = setActive.isPending || remove.isPending;
 
   return (

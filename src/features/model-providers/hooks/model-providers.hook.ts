@@ -1,113 +1,146 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { errorMessage } from "@/lib/api-error";
 import {
   modelProvidersKeys,
   modelProvidersOptions,
 } from "../options/model-providers.options";
 import {
-  addCustomModel,
-  removeCustomModel,
+  checkProvider,
+  removeModel,
   removeProviderKey,
   saveProviderKey,
   setModelEnabled,
   setPlatformDefaults,
-  type AddCustomModelInput,
+  upsertModel,
   type PlatformModelDefaults,
   type SaveProviderKeyInput,
+  type UpsertModelInput,
 } from "../service/model-providers.service";
 
-export function useProviders() {
-  return useQuery(modelProvidersOptions.list());
+export function useProvidersSuspense() {
+  return useSuspenseQuery(modelProvidersOptions.list());
 }
 
-export function usePlatformDefaults() {
-  return useQuery(modelProvidersOptions.defaults());
+function useInvalidate() {
+  const queryClient = useQueryClient();
+  return () =>
+    queryClient.invalidateQueries({ queryKey: modelProvidersKeys.all() });
 }
 
 function reportFailure(action: string) {
-  return (error: unknown) => {
-    toast.error(action, {
-      description: error instanceof Error ? error.message : undefined,
-    });
+  return async (error: unknown) => {
+    toast.error(action, { description: await errorMessage(error) });
   };
 }
 
-export function useSaveProviderKey(providerId: string) {
-  const queryClient = useQueryClient();
+export function useSaveProviderKey(providerId: string, providerName: string) {
+  const invalidate = useInvalidate();
 
   return useMutation({
     mutationFn: (input: SaveProviderKeyInput) =>
       saveProviderKey(providerId, input),
-    onSuccess: (provider) => {
-      toast.success(`${provider.name} key saved.`, {
+    onSuccess: () => {
+      toast.success(`${providerName} key saved.`, {
         description: "Only the masked hint is kept on screen from here on.",
       });
-      queryClient.invalidateQueries({ queryKey: modelProvidersKeys.providers() });
+      void invalidate();
     },
     onError: reportFailure("Could not save the key"),
   });
 }
 
-export function useRemoveProviderKey(providerId: string) {
-  const queryClient = useQueryClient();
+export function useRemoveProviderKey(providerId: string, providerName: string) {
+  const invalidate = useInvalidate();
 
   return useMutation({
     mutationFn: () => removeProviderKey(providerId),
-    onSuccess: (provider) => {
-      toast.success(`${provider.name} key removed.`, {
+    onSuccess: () => {
+      toast.success(`${providerName} key removed.`, {
         description: "Its models can no longer be selected by any workspace.",
       });
-      queryClient.invalidateQueries({ queryKey: modelProvidersKeys.providers() });
+      void invalidate();
     },
     onError: reportFailure("Could not remove the key"),
   });
 }
 
-export function useSetModelEnabled(providerId: string) {
-  const queryClient = useQueryClient();
+/**
+ * A rejected key is a successful request — the backend answers 200 with
+ * `ok: false` — so the failure toast here is for a request that never reached
+ * the provider at all.
+ */
+export function useCheckProvider(providerId: string) {
+  const invalidate = useInvalidate();
 
   return useMutation({
-    mutationFn: ({ modelId, enabled }: { modelId: string; enabled: boolean }) =>
-      setModelEnabled(providerId, modelId, enabled),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: modelProvidersKeys.providers() });
+    mutationFn: () => checkProvider(providerId),
+    onSuccess: (result) => {
+      if (result.ok) {
+        toast.success("The provider accepted the key.", {
+          description: result.detail,
+        });
+      } else {
+        toast.error("The provider rejected the key.", {
+          description: result.detail,
+        });
+      }
+      void invalidate();
     },
+    onError: reportFailure("Could not reach the provider"),
+  });
+}
+
+export function useSetModelEnabled(providerId: string) {
+  const invalidate = useInvalidate();
+
+  return useMutation({
+    mutationFn: ({ model, enabled }: { model: string; enabled: boolean }) =>
+      setModelEnabled(providerId, model, enabled),
+    onSuccess: () => void invalidate(),
     onError: reportFailure("Could not change the model"),
   });
 }
 
-export function useAddCustomModel(providerId: string) {
-  const queryClient = useQueryClient();
+export function useUpsertModel(providerId: string) {
+  const invalidate = useInvalidate();
 
   return useMutation({
-    mutationFn: (input: AddCustomModelInput) =>
-      addCustomModel(providerId, input),
+    mutationFn: (input: UpsertModelInput) => upsertModel(providerId, input),
     onSuccess: () => {
-      toast.success("Model added.");
-      queryClient.invalidateQueries({ queryKey: modelProvidersKeys.providers() });
+      toast.success("Model saved.");
+      void invalidate();
     },
-    onError: reportFailure("Could not add the model"),
+    onError: reportFailure("Could not save the model"),
   });
 }
 
-export function useRemoveCustomModel(providerId: string) {
-  const queryClient = useQueryClient();
+export function useRemoveModel(providerId: string) {
+  const invalidate = useInvalidate();
 
   return useMutation({
-    mutationFn: (modelId: string) => removeCustomModel(providerId, modelId),
-    onSuccess: () => {
-      toast.success("Model removed.");
-      queryClient.invalidateQueries({ queryKey: modelProvidersKeys.providers() });
+    mutationFn: (model: string) => removeModel(providerId, model),
+    onSuccess: (result) => {
+      toast.success(
+        result.revertedToBuiltIn
+          ? "Reverted to the built-in definition."
+          : "Model removed.",
+      );
+      void invalidate();
     },
     onError: reportFailure("Could not remove the model"),
   });
 }
 
 export function useSetPlatformDefaults() {
-  const queryClient = useQueryClient();
+  const invalidate = useInvalidate();
 
   return useMutation({
     mutationFn: (next: PlatformModelDefaults) => setPlatformDefaults(next),
@@ -116,7 +149,7 @@ export function useSetPlatformDefaults() {
         description:
           "Workspaces that have never chosen a model follow these from their next request.",
       });
-      queryClient.invalidateQueries({ queryKey: modelProvidersKeys.defaults() });
+      void invalidate();
     },
     onError: reportFailure("Could not save the defaults"),
   });

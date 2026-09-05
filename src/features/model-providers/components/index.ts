@@ -1,5 +1,9 @@
 export { AddModelDialog } from "./add-model-dialog";
-export { ModelProvidersView } from "./model-providers-view";
+export {
+  ModelProvidersError,
+  ModelProvidersLoading,
+  ModelProvidersView,
+} from "./model-providers-view";
 export { PlatformDefaultsPanel } from "./platform-defaults-panel";
 export { ProviderCredentialForm } from "./provider-credential-form";
 export { ProviderList } from "./provider-list";

@@ -105,21 +105,30 @@ Shared scaffolding lives in `src/components/`: `entity-components.tsx`
 - **Credit adjustments carry an idempotency key** generated once per opened
   dialog, so a double-click cannot move credit twice.
 
-## Screens that run ahead of the backend
+## Models and promo codes
 
-Two modules are UI only. They carry a `PrototypeNotice` banner saying so, their
-state lives in the browser tab, and a reload restores the fixture.
+Both shipped as UI-only prototypes in `v0.1.1rc1` and were wired to the backend
+on 2026-09-05.
 
 - **Models** (`/admin/models`) — provider API keys, the model catalogue and the
-  platform defaults. Today `ragenta-backend` reads provider keys from
-  environment variables (`src/ai/providers.ts`) and ships the catalogue as a
-  TypeScript table (`src/ai/models.ts`), so there is no key to edit and no model
-  row to toggle. Making it real means moving both into the database behind an
-  admin API, with the key encrypted at rest and only a masked hint returned —
-  which is already how this screen treats it.
+  platform defaults, over `/v1/admin/providers`. A key is write-only: it is
+  submitted, stored encrypted (AES-256-GCM) and never returned, so what stays on
+  screen is the masked hint. **Test connection** makes one authenticated call to
+  the provider — a model list, never a generation — and the result is persisted
+  on the credential row, so it survives a reload. Providers Ragenta has no
+  client for are listed with no models and say so; storing a key for one would
+  do nothing.
+
+  With `SECRETS_ENCRYPTION_KEY` unset the backend refuses to store a key rather
+  than writing it in the clear, and the page says so — otherwise the save button
+  looks broken for a reason nobody can see.
+
 - **Promo codes** (`/admin/promo-codes`) — redeemable codes granting credits to
-  a workspace. The backend has no promo-code module; the endpoints the service
-  expects are named in its header.
+  a workspace, over `/v1/admin/promo-codes`. Status (active / inactive / expired
+  / used up) is derived by the backend, so the badge here cannot disagree with
+  what a customer sees when they type the code in. A redeemed code can only be
+  deactivated: its redemption rows are the only record of credits the ledger
+  already shows.
 
 ## What is deliberately not here
 

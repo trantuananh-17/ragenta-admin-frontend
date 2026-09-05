@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useSetPlatformDefaults } from "../hooks/model-providers.hook";
 import type {
   ModelCapability,
@@ -26,7 +25,6 @@ interface Choice {
   key: string;
   label: string;
   selection: ModelSelection;
-  available: boolean;
 }
 
 const keyOf = (selection: ModelSelection) =>
@@ -49,13 +47,13 @@ function choicesFor(
         (model) =>
           model.capability === capability &&
           model.enabled &&
-          provider.credential.configured,
+          provider.credential.configured &&
+          provider.supported,
       )
       .map((model) => ({
         key: `${provider.id}:${model.model}`,
         label: `${provider.name} · ${model.model}`,
         selection: { provider: provider.id, model: model.model },
-        available: true,
       })),
   );
 
@@ -65,7 +63,6 @@ function choicesFor(
       key: keyOf(current),
       label: `${current.provider} · ${current.model} (unavailable)`,
       selection: current,
-      available: false,
     },
     ...choices,
   ];
@@ -115,15 +112,13 @@ function DefaultSelect({
 export function PlatformDefaultsPanel({
   providers,
   defaults,
-  isPending,
 }: {
   providers: ModelProvider[];
-  defaults: PlatformModelDefaults | undefined;
-  isPending: boolean;
+  defaults: PlatformModelDefaults;
 }) {
   const save = useSetPlatformDefaults();
 
-  const [draft, setDraft] = useState<PlatformModelDefaults | undefined>(defaults);
+  const [draft, setDraft] = useState<PlatformModelDefaults>(defaults);
   const [lastServerValue, setLastServerValue] = useState(defaults);
 
   // Adjusted during render rather than in an effect, so a save never leaves the
@@ -131,18 +126,6 @@ export function PlatformDefaultsPanel({
   if (defaults !== lastServerValue) {
     setLastServerValue(defaults);
     setDraft(defaults);
-  }
-
-  if (isPending || !draft || !defaults) {
-    return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Platform defaults"
-          description="The models a workspace runs until it chooses its own."
-        />
-        <Skeleton className="h-48 w-full" />
-      </div>
-    );
   }
 
   const dirty =
@@ -180,7 +163,7 @@ export function PlatformDefaultsPanel({
           <DefaultSelect
             id="default-embedding"
             label="Embedding"
-            hint="Changing this does not re-embed anything already indexed — old and new vectors would not be comparable."
+            hint="Only new knowledge bases follow this. An existing one is pinned to the model that produced its vectors, because vectors from two models are not comparable."
             choices={choicesFor(providers, "embedding", draft.embedding)}
             value={draft.embedding}
             onChange={(embedding) => setDraft({ ...draft, embedding })}

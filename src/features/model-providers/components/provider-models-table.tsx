@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import { formatNumber, formatUsd } from "@/lib/format";
 import {
-  useRemoveCustomModel,
+  useRemoveModel,
   useSetModelEnabled,
 } from "../hooks/model-providers.hook";
 import type {
@@ -32,7 +32,7 @@ function rateLabel(model: ProviderModel): string {
 
 export function ProviderModelsTable({ provider }: { provider: ModelProvider }) {
   const setEnabled = useSetModelEnabled(provider.id);
-  const remove = useRemoveCustomModel(provider.id);
+  const remove = useRemoveModel(provider.id);
 
   return (
     <div className="overflow-x-auto">
@@ -42,7 +42,7 @@ export function ProviderModelsTable({ provider }: { provider: ModelProvider }) {
             <TableHead>Model</TableHead>
             <TableHead>Capability</TableHead>
             <TableHead>Tier</TableHead>
-            <TableHead className="text-right">Context</TableHead>
+            <TableHead className="text-right">Context / width</TableHead>
             <TableHead>Rates</TableHead>
             <TableHead className="w-24">Offered</TableHead>
             <TableHead className="w-12">
@@ -66,7 +66,16 @@ export function ProviderModelsTable({ provider }: { provider: ModelProvider }) {
                 </StatusBadge>
               </TableCell>
               <TableCell className="text-right tabular-nums">
-                {model.contextWindow ? formatNumber(model.contextWindow) : "—"}
+                {/* Chat models show their context window; an embedding model
+                    shows its vector width, which is the number that decides
+                    where its vectors are indexed. */}
+                {model.capability === "embedding"
+                  ? model.embeddingDimensions
+                    ? `${formatNumber(model.embeddingDimensions)}d`
+                    : "—"
+                  : model.contextWindow
+                    ? formatNumber(model.contextWindow)
+                    : "—"}
               </TableCell>
               <TableCell className="text-xs text-muted-foreground">
                 {rateLabel(model)}
@@ -81,7 +90,7 @@ export function ProviderModelsTable({ provider }: { provider: ModelProvider }) {
                   }
                   aria-label={`Offer ${model.model}`}
                   onCheckedChange={(enabled) =>
-                    setEnabled.mutate({ modelId: model.id, enabled })
+                    setEnabled.mutate({ model: model.model, enabled })
                   }
                 />
               </TableCell>
@@ -92,7 +101,7 @@ export function ProviderModelsTable({ provider }: { provider: ModelProvider }) {
                     size="icon"
                     aria-label={`Remove ${model.model}`}
                     disabled={remove.isPending}
-                    onClick={() => remove.mutate(model.id)}
+                    onClick={() => remove.mutate(model.model)}
                   >
                     <Trash2 className="size-4" />
                   </Button>
