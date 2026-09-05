@@ -142,14 +142,3 @@ on 2026-09-05.
 - **A production deployment.** Staging runs at
   `staging-admin-frontend.ragenta.cloud`; the `production` GitHub Environment
   exists but is empty, as it is for every other repository here.
-
-## The reference clone
-
-`vecura-admin-frontend/` is a **read-only** reference (ADR-012). It is
-gitignored, excluded from `tsconfig.json` and from ESLint. Never edit, stage or
-commit inside it.
-
-The layout, the feature-module pattern and the shared entity components are
-modelled on it. Everything domain-specific was dropped — it administers a
-five-backend drug-discovery platform, and Ragenta has two backends and a
-different domain.
