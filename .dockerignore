@@ -1,0 +1,8 @@
+node_modules
+.next
+.git
+.env*
+!.env.example
+vecura-admin-frontend
+README.md
+architecture.md
