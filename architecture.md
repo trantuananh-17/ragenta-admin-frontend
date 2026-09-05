@@ -60,7 +60,9 @@ src/app/
 │       ├── page.tsx                 # Dashboard
 │       ├── users/                   # accounts, roles, suspensions, sessions
 │       ├── workspaces/[workspaceId] # tenant detail, credits, plan
+│       ├── models/                  # provider keys, catalogue, platform defaults
 │       ├── plans/                   # read-only price list
+│       ├── promo-codes/             # redeemable credit grants
 │       ├── audit-log/               # append-only trail
 │       └── content/
 │           ├── posts/[id], /new
@@ -145,7 +147,28 @@ renders immediately without a second fetch.
 screens use `detail-shell.tsx` (`DetailShell`, `DetailSection`, `DetailList`).
 Cross-cutting pieces: `locale-tabs`, `status-badge`, `confirm-dialog`,
 `stat-card`, `markdown-preview`, `tag-input`, `copy-button`,
-`content-status-filter`.
+`content-status-filter`, `prototype-notice`.
+
+### Prototype screens
+
+Two modules — `promo-codes` and `model-providers` — are UI ahead of the backend.
+They keep the module shape, but their `service/` holds a fixture and a
+module-level store instead of a `ky` call, they use `useQuery` rather than
+`useSuspenseQuery` (there is no prefetch to hydrate from), and their page has no
+`HydrationBoundary`. Every one of them renders `PrototypeNotice` at the top, so
+an admin can tell a screen that failed to save from one that was never able to.
+
+Making either real is a one-file change: replace the function bodies in
+`service/` with calls through `api` and delete the store. The endpoints each one
+expects are named in its service header.
+
+`promo-codes` deliberately drops the per-grant expiry the reference console
+offers — `credit_balance` expires nothing, so the field would promise what the
+ledger cannot keep. `model-providers` mirrors the real catalogue from
+`ragenta-backend/src/ai/models.ts` for the three supported providers and leaves
+the rest without models, rather than inventing rates that would be read as
+billing truth. A provider key is write-only in the UI: submitted, never read
+back, shown only as a masked hint.
 
 ### URL state with nuqs
 

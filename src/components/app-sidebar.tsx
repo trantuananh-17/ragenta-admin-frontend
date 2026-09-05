@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  Boxes,
   Building2,
   CreditCard,
   FileText,
@@ -14,6 +15,7 @@ import {
   ScrollText,
   Settings2,
   Sparkles,
+  Ticket,
   UserCircle,
 } from "lucide-react";
 
@@ -48,11 +50,15 @@ const menuGroups: MenuGroup[] = [
     items: [
       { title: "Users", icon: UserCircle, url: "/admin/users" },
       { title: "Workspaces", icon: Building2, url: "/admin/workspaces" },
+      { title: "Models", icon: Boxes, url: "/admin/models" },
     ],
   },
   {
     label: "Billing",
-    items: [{ title: "Plans", icon: CreditCard, url: "/admin/plans" }],
+    items: [
+      { title: "Plans", icon: CreditCard, url: "/admin/plans" },
+      { title: "Promo codes", icon: Ticket, url: "/admin/promo-codes" },
+    ],
   },
   {
     label: "Landing content",

@@ -105,12 +105,24 @@ Shared scaffolding lives in `src/components/`: `entity-components.tsx`
 - **Credit adjustments carry an idempotency key** generated once per opened
   dialog, so a double-click cannot move credit twice.
 
+## Screens that run ahead of the backend
+
+Two modules are UI only. They carry a `PrototypeNotice` banner saying so, their
+state lives in the browser tab, and a reload restores the fixture.
+
+- **Models** (`/admin/models`) — provider API keys, the model catalogue and the
+  platform defaults. Today `ragenta-backend` reads provider keys from
+  environment variables (`src/ai/providers.ts`) and ships the catalogue as a
+  TypeScript table (`src/ai/models.ts`), so there is no key to edit and no model
+  row to toggle. Making it real means moving both into the database behind an
+  admin API, with the key encrypted at rest and only a masked hint returned —
+  which is already how this screen treats it.
+- **Promo codes** (`/admin/promo-codes`) — redeemable codes granting credits to
+  a workspace. The backend has no promo-code module; the endpoints the service
+  expects are named in its header.
+
 ## What is deliberately not here
 
-- **Models.** `ragenta-backend` exposes its model catalogue only per workspace
-  (`GET /v1/workspaces/:id/models`, behind workspace membership), so a platform
-  administrator has no endpoint to read it through. It needs an admin route on
-  the backend before it can have a screen here.
 - **An aggregate dashboard endpoint.** The dashboard composes the three admin
   lists it already has, and says on the page that anything derived from the
   workspace list covers at most 100 rows. The fix is
@@ -118,10 +130,9 @@ Shared scaffolding lives in `src/components/`: `entity-components.tsx`
 - **Workspace member management.** The backend's admin API reads a workspace but
   does not administer its members; the workspace-scoped member routes require
   membership, which a platform administrator does not have.
-- **CI, Docker Compose wiring and a deployed hostname.** The `Dockerfile` is
-  written and the app builds standalone on port 8083 (the port reserved for this
-  service), but there is no GitHub repository, workflow, compose service, DNS
-  record or certificate yet.
+- **A production deployment.** Staging runs at
+  `staging-admin-frontend.ragenta.cloud`; the `production` GitHub Environment
+  exists but is empty, as it is for every other repository here.
 
 ## The reference clone
 
