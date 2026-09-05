@@ -17,6 +17,7 @@ export const metadata: Metadata = {
   description: "Internal console for the Ragenta platform and marketing site.",
   // Internal tool: nothing here should ever reach a search index.
   robots: { index: false, follow: false },
+  icons: { icon: "/favicon.svg" },
 };
 
 export default function RootLayout({
