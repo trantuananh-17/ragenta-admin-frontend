@@ -1,3 +1,4 @@
+import { InfoHint } from "@/components/info-hint";
 import { cn } from "@/lib/utils";
 
 /**
@@ -28,12 +29,15 @@ export function DetailShell({
 export function DetailSection({
   title,
   description,
+  info,
   actions,
   children,
   className,
 }: {
   title: string;
   description?: React.ReactNode;
+  /** The longer explanation, shown on hover beside the title. */
+  info?: React.ReactNode;
   actions?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
@@ -44,7 +48,10 @@ export function DetailSection({
     >
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <h2 className="text-base font-semibold">{title}</h2>
+          <h2 className="flex items-center gap-1.5 text-base font-semibold">
+            {title}
+            {info && <InfoHint label={`About ${title}`}>{info}</InfoHint>}
+          </h2>
           {description && (
             <p className="text-sm text-muted-foreground">{description}</p>
           )}

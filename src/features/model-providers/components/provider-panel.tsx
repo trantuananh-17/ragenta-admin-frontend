@@ -13,6 +13,17 @@ import { ProviderCredentialForm } from "./provider-credential-form";
 import { ProviderModelsTable } from "./provider-models-table";
 import type { ModelProvider } from "../service/model-providers.service";
 
+/**
+ * The first sentence, for the line under the title. A provider like OpenRouter
+ * carries a paragraph explaining namespaced model ids and why its catalogue is
+ * imported rather than compiled in — worth keeping, not worth reading again
+ * every time somebody opens the panel to paste a key.
+ */
+function summary(description: string): string {
+  const end = description.indexOf(". ");
+  return end === -1 ? description : description.slice(0, end + 1);
+}
+
 export function ProviderPanel({ provider }: { provider: ModelProvider }) {
   const [addingModel, setAddingModel] = useState(false);
 
@@ -22,7 +33,8 @@ export function ProviderPanel({ provider }: { provider: ModelProvider }) {
     <div className="space-y-6">
       <PageHeader
         title={provider.name}
-        description={provider.description}
+        description={summary(provider.description)}
+        info={provider.description}
         badges={
           provider.supported ? (
             <StatusBadge tone="info">adapter shipped</StatusBadge>
@@ -47,8 +59,9 @@ export function ProviderPanel({ provider }: { provider: ModelProvider }) {
         description={
           provider.models.length === 0
             ? "Nothing in the catalogue for this provider yet."
-            : `${offered} of ${provider.models.length} offered to workspaces. A plan still decides which tier a workspace may pick from.`
+            : `${offered} of ${provider.models.length} offered to workspaces.`
         }
+        info="Offering a model makes it eligible; a plan's tier rule and its model allowlist still decide which workspaces may pick it."
         actions={
           <Button
             variant="outline"

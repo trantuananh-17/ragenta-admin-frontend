@@ -32,20 +32,17 @@ const CAPABILITIES = [
   {
     id: "chat" as const,
     title: "Chat",
-    description:
-      "What a workspace on this plan may answer with. It picks one per conversation; the default is what it gets before it picks.",
+    info: "What a workspace on this plan may answer with. It picks one per conversation; the default is what it gets before it picks.",
   },
   {
     id: "embedding" as const,
     title: "Embedding",
-    description:
-      "Chosen once, when a knowledge base is created, and frozen after — vectors from two models cannot be compared. Narrowing this list does not move an existing base.",
+    info: "Chosen once, when a knowledge base is created, and frozen after — vectors from two models cannot be compared. Narrowing this list does not move an existing base.",
   },
   {
     id: "rerank" as const,
     title: "Rerank",
-    description:
-      "A second pass over retrieved passages. Optional, priced per search, and set per knowledge base rather than workspace-wide — so there is no default to choose.",
+    info: "A second pass over retrieved passages. Optional, priced per search, and set per knowledge base rather than workspace-wide — so there is no default to choose.",
   },
 ];
 
@@ -93,7 +90,7 @@ function offeredModels(
 
 function CapabilitySection({
   title,
-  description,
+  info,
   offered,
   allowed,
   onAllowedChange,
@@ -102,7 +99,7 @@ function CapabilitySection({
   onSelectedChange,
 }: {
   title: string;
-  description: string;
+  info: string;
   offered: Offered[];
   allowed: string[];
   onAllowedChange: (next: string[]) => void;
@@ -127,7 +124,7 @@ function CapabilitySection({
   };
 
   return (
-    <DetailSection title={title} description={description}>
+    <DetailSection title={title} info={info}>
       {offered.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           No {title.toLowerCase()} model is offered by a provider that holds a
@@ -256,7 +253,8 @@ export function PlanModelAccessPanel({
     <div className="space-y-6">
       <PageHeader
         title="Model access by plan"
-        description="Which models each plan may run, and what it runs before a workspace chooses. An empty list means the plan keeps its tier rule."
+        description="An empty list keeps the plan's tier rule."
+        info="Which models each plan may run, and what it runs before a workspace chooses. Ticking nothing changes nothing: the plan keeps the tier rule it has always had, so this screen is opt-in per plan and per capability."
       />
 
       <Tabs
@@ -284,7 +282,7 @@ export function PlanModelAccessPanel({
             <CapabilitySection
               key={capability.id}
               title={capability.title}
-              description={capability.description}
+              info={capability.info}
               offered={offered}
               allowed={draft.rerank.allowed}
               fallback={fallback}
@@ -300,7 +298,7 @@ export function PlanModelAccessPanel({
           <CapabilitySection
             key={capability.id}
             title={capability.title}
-            description={capability.description}
+            info={capability.info}
             offered={offered}
             allowed={bucket.allowed}
             fallback={fallback}

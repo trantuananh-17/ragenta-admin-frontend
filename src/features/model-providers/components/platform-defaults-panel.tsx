@@ -136,12 +136,13 @@ export function PlatformDefaultsPanel({
     <div className="space-y-6">
       <PageHeader
         title="Platform defaults"
-        description="The models a workspace runs until it chooses its own. Changing them moves every workspace that has never opened its model settings."
+        description="What a workspace runs until it chooses its own."
+        info="Changing these moves every workspace that has never opened its model settings — which is most of them. A plan default, set below, overrides this for the plans that have one."
       />
 
       <DetailSection
         title="Default models"
-        description="Only models that are offered and whose provider holds a key can be chosen here."
+        info="Only models that are offered and whose provider holds a key are listed. Pointing a default at a provider with no key makes every workspace on it fail its next request."
         actions={
           <Button
             disabled={!dirty || save.isPending}
