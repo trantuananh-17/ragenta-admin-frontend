@@ -87,6 +87,8 @@ export const modelProviderSchema = z.object({
   description: z.string(),
   /** Whether ragenta-backend has a client for this provider at all. */
   supported: z.boolean(),
+  /** The provider publishes a priced catalogue, so it can be pulled rather than typed. */
+  importable: z.boolean().default(false),
   /** What the key looks like, shown as a placeholder. */
   keyHint: z.string(),
   /** True for providers with no default host — a self-hosted server. */
@@ -130,7 +132,14 @@ export type ModelProvider = z.infer<typeof modelProviderSchema>;
 export type ModelSelection = z.infer<typeof modelSelectionSchema>;
 export type PlatformModelDefaults = z.infer<typeof platformDefaultsSchema>;
 export type ProvidersResponse = z.infer<typeof providersResponseSchema>;
+export const importResultSchema = z.object({
+  provider: z.string(),
+  imported: z.number(),
+  detail: z.string(),
+});
+
 export type CheckResult = z.infer<typeof checkResultSchema>;
+export type ImportResult = z.infer<typeof importResultSchema>;
 
 export interface SaveProviderKeyInput {
   apiKey: string;
@@ -188,6 +197,20 @@ export async function removeProviderKey(
 export async function checkProvider(providerId: string): Promise<CheckResult> {
   const response = await api.post(`admin/providers/${providerId}/check`);
   return checkResultSchema.parse(await response.json());
+}
+
+/**
+ * Pull the provider's own catalogue, priced from its own API.
+ *
+ * Offered only where a provider publishes prices machine-readably. It upserts
+ * and never deletes, so it doubles as the way to refresh prices that have moved
+ * since the last import.
+ */
+export async function importProviderModels(
+  providerId: string,
+): Promise<ImportResult> {
+  const response = await api.post(`admin/providers/${providerId}/models/import`);
+  return importResultSchema.parse(await response.json());
 }
 
 export async function upsertModel(

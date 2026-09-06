@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { formatDateTime } from "@/lib/format";
 import {
   useCheckProvider,
+  useImportProviderModels,
   useRemoveProviderKey,
   useSaveProviderKey,
 } from "../hooks/model-providers.hook";
@@ -78,6 +79,7 @@ export function ProviderCredentialForm({
   const save = useSaveProviderKey(provider.id, provider.name);
   const remove = useRemoveProviderKey(provider.id, provider.name);
   const check = useCheckProvider(provider.id);
+  const importModels = useImportProviderModels(provider.id);
 
   const {
     register,
@@ -130,6 +132,20 @@ export function ProviderCredentialForm({
                 )}
                 Test connection
               </Button>
+              {provider.importable && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={importModels.isPending}
+                  onClick={() => importModels.mutate()}
+                >
+                  {importModels.isPending && (
+                    <Loader2 className="size-4 animate-spin" />
+                  )}
+                  Import models
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="outline"

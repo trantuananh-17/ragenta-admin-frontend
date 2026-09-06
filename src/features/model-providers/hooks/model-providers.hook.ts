@@ -14,6 +14,7 @@ import {
 } from "../options/model-providers.options";
 import {
   checkProvider,
+  importProviderModels,
   removeModel,
   removeProviderKey,
   saveProviderKey,
@@ -77,6 +78,19 @@ export function useRemoveProviderKey(providerId: string, providerName: string) {
  * `ok: false` — so the failure toast here is for a request that never reached
  * the provider at all.
  */
+export function useImportProviderModels(providerId: string) {
+  const invalidate = useInvalidate();
+
+  return useMutation({
+    mutationFn: () => importProviderModels(providerId),
+    onSuccess: (result) => {
+      toast.success("Catalogue imported", { description: result.detail });
+      void invalidate();
+    },
+    onError: reportFailure("Could not import the catalogue"),
+  });
+}
+
 export function useCheckProvider(providerId: string) {
   const invalidate = useInvalidate();
 
