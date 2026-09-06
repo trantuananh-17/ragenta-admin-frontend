@@ -11,6 +11,8 @@ import { planLimitsSchema } from "@/features/workspaces/service/workspaces.servi
  */
 export const plansResponseSchema = z.object({
   signupGrantCredits: z.number(),
+  /** Defaulted so an older backend does not fail the whole price list. */
+  freeMonthlyCredits: z.number().default(0),
   plans: z.array(planLimitsSchema.extend({ name: z.string() })),
   topupPacks: z.array(
     z.object({

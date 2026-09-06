@@ -47,7 +47,12 @@ export function PlansView() {
         <StatCard
           label="Signup grant"
           value={formatCredits(data.signupGrantCredits)}
-          hint="One-time, on the free plan. Never refilled."
+          hint="One-time, per account, on the first workspace it creates."
+        />
+        <StatCard
+          label="Free monthly"
+          value={formatCredits(data.freeMonthlyCredits)}
+          hint="Per account, on that same first workspace. A second free workspace gets nothing."
         />
         {data.topupPacks.map((pack) => (
           <StatCard
