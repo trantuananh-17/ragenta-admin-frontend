@@ -5,6 +5,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 
 import { EntityStateView } from "@/components/entity-components";
 import { useProvidersSuspense } from "../hooks/model-providers.hook";
+import { PlanModelAccessPanel } from "./plan-model-access-panel";
 import { PlatformDefaultsPanel } from "./platform-defaults-panel";
 import { ProviderList, type ProviderSelection } from "./provider-list";
 import { ProviderPanel } from "./provider-panel";
@@ -49,10 +50,13 @@ export function ModelProvidersView() {
         )}
 
         {selection === null ? (
-          <PlatformDefaultsPanel
-            providers={data.providers}
-            defaults={data.defaults}
-          />
+          <>
+            <PlatformDefaultsPanel
+              providers={data.providers}
+              defaults={data.defaults}
+            />
+            <PlanModelAccessPanel providers={data.providers} />
+          </>
         ) : selected ? (
           <ProviderPanel provider={selected} />
         ) : null}

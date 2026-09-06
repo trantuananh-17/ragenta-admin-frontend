@@ -1,10 +1,14 @@
 import { queryOptions } from "@tanstack/react-query";
 
-import { listProviders } from "../service/model-providers.service";
+import {
+  getPlanModelAccess,
+  listProviders,
+} from "../service/model-providers.service";
 
 export const modelProvidersKeys = {
   all: () => ["model-providers"] as const,
   providers: () => [...modelProvidersKeys.all(), "providers"] as const,
+  planAccess: () => [...modelProvidersKeys.all(), "plan-access"] as const,
 };
 
 export const modelProvidersOptions = {
@@ -19,5 +23,12 @@ export const modelProvidersOptions = {
     queryOptions({
       queryKey: modelProvidersKeys.providers(),
       queryFn: listProviders,
+    }),
+
+  /** Separate from the provider list: it changes on its own schedule. */
+  planAccess: () =>
+    queryOptions({
+      queryKey: modelProvidersKeys.planAccess(),
+      queryFn: getPlanModelAccess,
     }),
 };

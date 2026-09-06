@@ -19,8 +19,11 @@ import {
   removeProviderKey,
   saveProviderKey,
   setModelEnabled,
+  setPlanModelAccess,
   setPlatformDefaults,
   upsertModel,
+  type PlanModelAccess,
+  type PlanName,
   type PlatformModelDefaults,
   type SaveProviderKeyInput,
   type UpsertModelInput,
@@ -166,5 +169,25 @@ export function useSetPlatformDefaults() {
       void invalidate();
     },
     onError: reportFailure("Could not save the defaults"),
+  });
+}
+
+export function usePlanModelAccessSuspense() {
+  return useSuspenseQuery(modelProvidersOptions.planAccess());
+}
+
+export function useSetPlanModelAccess(plan: PlanName) {
+  const invalidate = useInvalidate();
+
+  return useMutation({
+    mutationFn: (input: PlanModelAccess) => setPlanModelAccess(plan, input),
+    onSuccess: () => {
+      toast.success(`Model access saved for ${plan}.`, {
+        description:
+          "Workspaces on this plan see the new list on their next request.",
+      });
+      void invalidate();
+    },
+    onError: reportFailure("Could not save model access"),
   });
 }

@@ -138,6 +138,40 @@ export const providersResponseSchema = z.object({
   providers: z.array(modelProviderSchema),
 });
 
+/**
+ * What one plan may run, per capability.
+ *
+ * `allowed` holds `provider:model` keys, and **empty means unrestricted within
+ * the plan's tier** — not "no models". A deployment that has never opened this
+ * screen keeps the tier rule it always had; filling a list in is how an
+ * administrator opts into the narrower one.
+ */
+export const capabilityAccessSchema = z.object({
+  allowed: z.array(z.string()),
+  default: modelSelectionSchema.nullable(),
+});
+
+export const planModelAccessSchema = z.object({
+  chat: capabilityAccessSchema,
+  embedding: capabilityAccessSchema,
+  /** No default: a reranker is chosen per knowledge base, never workspace-wide. */
+  rerank: capabilityAccessSchema.omit({ default: true }),
+});
+
+export const PLAN_NAMES = ["free", "pro", "team", "enterprise"] as const;
+export type PlanName = (typeof PLAN_NAMES)[number];
+
+export const planModelAccessMapSchema = z.object({
+  free: planModelAccessSchema,
+  pro: planModelAccessSchema,
+  team: planModelAccessSchema,
+  enterprise: planModelAccessSchema,
+});
+
+export type CapabilityAccess = z.infer<typeof capabilityAccessSchema>;
+export type PlanModelAccess = z.infer<typeof planModelAccessSchema>;
+export type PlanModelAccessMap = z.infer<typeof planModelAccessMapSchema>;
+
 export const checkResultSchema = z.object({
   ok: z.boolean(),
   checkedAt: z.string(),
@@ -280,4 +314,23 @@ export async function removeModel(
   return z
     .object({ removed: z.boolean(), revertedToBuiltIn: z.boolean() })
     .parse(await response.json());
+}
+
+export async function getPlanModelAccess(): Promise<PlanModelAccessMap> {
+  const response = await api.get("admin/settings/model-access");
+  return planModelAccessMapSchema.parse(await response.json());
+}
+
+/**
+ * One plan per request. The screen edits one at a time, and sending the whole
+ * map would let a tab left open overwrite a plan somebody else just changed.
+ */
+export async function setPlanModelAccess(
+  plan: PlanName,
+  input: PlanModelAccess,
+): Promise<PlanModelAccessMap> {
+  const response = await api.put(`admin/settings/model-access/${plan}`, {
+    json: input,
+  });
+  return planModelAccessMapSchema.parse(await response.json());
 }

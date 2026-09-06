@@ -4,6 +4,7 @@ export {
   ModelProvidersLoading,
   ModelProvidersView,
 } from "./model-providers-view";
+export { PlanModelAccessPanel } from "./plan-model-access-panel";
 export { PlatformDefaultsPanel } from "./platform-defaults-panel";
 export { ProviderCredentialForm } from "./provider-credential-form";
 export { ProviderList } from "./provider-list";
