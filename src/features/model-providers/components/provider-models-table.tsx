@@ -27,6 +27,11 @@ function rateLabel(model: ProviderModel): string {
   if (model.capability === "embedding") {
     return `${formatUsd(model.rates.embeddingPerMillion)} / M`;
   }
+  // A reranker has no output: it scores passages rather than generating, and
+  // the backend carries its per-search price in the input column.
+  if (model.capability === "rerank") {
+    return `${formatUsd(model.rates.inputPerMillion)} / M scored`;
+  }
   return `${formatUsd(model.rates.inputPerMillion)} in · ${formatUsd(model.rates.outputPerMillion)} out / M`;
 }
 

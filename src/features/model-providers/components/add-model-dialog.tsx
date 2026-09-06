@@ -30,7 +30,7 @@ const schema = z.object({
     .string()
     .trim()
     .min(1, "The provider's own model id, exactly as it appears in their API."),
-  capability: z.enum(["chat", "embedding"]),
+  capability: z.enum(["chat", "embedding", "rerank"]),
   tier: z.enum(["economy", "premium"]),
   contextWindow: z.number().int().positive().optional(),
   embeddingDimensions: z.number().int().positive().optional(),
@@ -163,6 +163,7 @@ export function AddModelDialog({
                 <SelectContent>
                   <SelectItem value="chat">Chat</SelectItem>
                   <SelectItem value="embedding">Embedding</SelectItem>
+                  <SelectItem value="rerank">Rerank</SelectItem>
                 </SelectContent>
               </Select>
             </div>

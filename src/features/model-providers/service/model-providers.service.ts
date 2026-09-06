@@ -20,7 +20,16 @@ import { api } from "@/lib/ky";
  * merged with the `provider_model` rows written from here, so what is on screen
  * is what the backend will actually price and offer.
  */
-export const modelCapabilitySchema = z.enum(["chat", "embedding"]);
+/**
+ * Must stay in step with `ModelCapability` in the backend's `src/ai/models.ts`.
+ *
+ * These are two hand-kept copies of one enum with nothing checking they agree,
+ * and that has already cost an outage: `rerank` was added to the backend
+ * catalogue and this screen went from working to "Could not load model
+ * providers" — a zod parse failure on a 200 response, which reads as the backend
+ * being down. Anything added there has to be added here in the same release.
+ */
+export const modelCapabilitySchema = z.enum(["chat", "embedding", "rerank"]);
 export const modelTierSchema = z.enum(["economy", "premium"]);
 
 export type ModelCapability = z.infer<typeof modelCapabilitySchema>;
@@ -56,7 +65,17 @@ export const providerModelSchema = z.object({
   id: z.string(),
   provider: z.string(),
   model: z.string(),
-  capability: modelCapabilitySchema,
+  /**
+   * Read as a plain string, not as the enum above.
+   *
+   * A capability this build has not heard of is a backend that is ahead of it,
+   * which is normal during a rollout — and a strict enum turns that into a zod
+   * throw that blanks the entire screen behind "the backend refused or is
+   * unreachable", on a 200 response. The form still writes the strict enum,
+   * because what may be *created* is this build's business; what may be
+   * *displayed* is not.
+   */
+  capability: z.string(),
   tier: modelTierSchema,
   contextWindow: z.number().nullable(),
   /** Embedding models only. It decides which vector collection they index into. */
