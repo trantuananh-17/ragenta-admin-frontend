@@ -12,6 +12,7 @@ import {
   LayoutList,
   LogOut,
   Megaphone,
+  Plug,
   ScrollText,
   Settings2,
   Sparkles,
@@ -51,6 +52,7 @@ const menuGroups: MenuGroup[] = [
       { title: "Users", icon: UserCircle, url: "/admin/users" },
       { title: "Workspaces", icon: Building2, url: "/admin/workspaces" },
       { title: "Models", icon: Boxes, url: "/admin/models" },
+      { title: "Connections", icon: Plug, url: "/admin/integrations" },
     ],
   },
   {
