@@ -12,6 +12,7 @@ import {
   LayoutList,
   LogOut,
   Megaphone,
+  Mic,
   Plug,
   ScrollText,
   Settings2,
@@ -53,6 +54,7 @@ const menuGroups: MenuGroup[] = [
       { title: "Workspaces", icon: Building2, url: "/admin/workspaces" },
       { title: "Models", icon: Boxes, url: "/admin/models" },
       { title: "Connections", icon: Plug, url: "/admin/integrations" },
+      { title: "Speech", icon: Mic, url: "/admin/speech" },
     ],
   },
   {
