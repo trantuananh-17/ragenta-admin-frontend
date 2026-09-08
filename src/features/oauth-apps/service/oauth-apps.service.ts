@@ -14,7 +14,14 @@ export const oauthProviderSchema = z.object({
   id: z.string(),
   name: z.string(),
   scopes: z.array(z.string()),
+  /** Registered *and* switched on — the one question a workspace's screen asks. */
   configured: z.boolean(),
+  /** A client id and a secret are both stored. Says nothing about the switch. */
+  registered: z.boolean(),
+  enabled: z.boolean(),
+  /** Not a secret: it travels in the query string of every consent screen. */
+  clientId: z.string(),
+  hasSecret: z.boolean(),
   redirectUri: z.string(),
 });
 
