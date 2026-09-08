@@ -16,11 +16,13 @@ import {
   Plug,
   KeyRound,
   ScrollText,
+  Server,
   Settings2,
   ShieldCheck,
   Sparkles,
   Ticket,
   TrendingUp,
+  TriangleAlert,
   UserCircle,
 } from "lucide-react";
 
@@ -59,7 +61,9 @@ const menuGroups: MenuGroup[] = [
       { title: "Models", icon: Boxes, url: "/admin/models" },
       { title: "Connections", icon: Plug, url: "/admin/integrations" },
       { title: "Connected apps", icon: KeyRound, url: "/admin/connected-apps" },
+      { title: "MCP servers", icon: Server, url: "/admin/mcp-servers" },
       { title: "Speech", icon: Mic, url: "/admin/speech" },
+      { title: "Provider errors", icon: TriangleAlert, url: "/admin/provider-errors" },
     ],
   },
   {
