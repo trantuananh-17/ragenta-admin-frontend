@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
+import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,7 +40,7 @@ export function ProviderErrorsView() {
   const total = data.summary.reduce((sum, row) => sum + row.failures, 0);
 
   return (
-    <>
+    <DetailShell>
       <PageHeader
         title="Provider errors"
         description="Calls to a model provider that failed — refused, rate limited, timed out."
@@ -173,7 +174,7 @@ export function ProviderErrorsView() {
           </section>
         </div>
       )}
-    </>
+    </DetailShell>
   );
 }
 
@@ -187,26 +188,30 @@ function StatusCode({ status }: { status: number | null }) {
 
 export function ProviderErrorsLoading() {
   return (
-    <div className="space-y-4">
-      <Skeleton className="h-8 w-48" />
-      <Skeleton className="h-64" />
-      <p className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
-        Loading provider errors...
-      </p>
-    </div>
+    <DetailShell>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-64" />
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" />
+          Loading provider errors...
+        </p>
+      </div>
+    </DetailShell>
   );
 }
 
 export function ProviderErrorsError() {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-md border p-10 text-center">
-      <AlertCircle className="size-8 text-destructive" />
-      <p className="font-medium">Could not load provider errors</p>
-      <p className="max-w-md text-sm text-muted-foreground">
-        The platform admin API refused or is unreachable. This screen needs the{" "}
-        <code className="font-mono text-xs">admin.errors.read</code> permission.
-      </p>
-    </div>
+    <DetailShell>
+      <div className="flex flex-col items-center gap-2 rounded-md border p-10 text-center">
+        <AlertCircle className="size-8 text-destructive" />
+        <p className="font-medium">Could not load provider errors</p>
+        <p className="max-w-md text-sm text-muted-foreground">
+          The platform admin API refused or is unreachable. This screen needs the{" "}
+          <code className="font-mono text-xs">admin.errors.read</code> permission.
+        </p>
+      </div>
+    </DetailShell>
   );
 }

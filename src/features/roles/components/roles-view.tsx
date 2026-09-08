@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AlertCircle, Loader2, Plus, ShieldCheck } from "lucide-react";
 
+import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,7 @@ export function RolesView() {
   const platformRoles = roles.filter((role) => role.scope === "platform");
 
   return (
-    <>
+    <DetailShell className="flex flex-col overflow-hidden">
       <PageHeader
         title="Roles"
         description="A role is a named set of permissions. Built-in roles come from the release; the ones you create here are yours to compose."
@@ -89,7 +90,7 @@ export function RolesView() {
         onOpenChange={setCreating}
         onCreated={(roleId) => setSelectedId(roleId)}
       />
-    </>
+    </DetailShell>
   );
 }
 
@@ -142,31 +143,35 @@ function RoleGroup({
 
 export function RolesLoading() {
   return (
-    <div className="space-y-4">
-      <Skeleton className="h-8 w-40" />
-      <div className="grid gap-4 lg:grid-cols-[18rem_1fr]">
-        <Skeleton className="h-64" />
-        <Skeleton className="h-64" />
+    <DetailShell>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-40" />
+        <div className="grid gap-4 lg:grid-cols-[18rem_1fr]">
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64" />
+        </div>
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" />
+          Loading roles...
+        </p>
       </div>
-      <p className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
-        Loading roles...
-      </p>
-    </div>
+    </DetailShell>
   );
 }
 
 export function RolesError() {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-md border p-10 text-center">
-      <AlertCircle className="size-8 text-destructive" />
-      <p className="font-medium">Could not load roles</p>
-      <p className="max-w-md text-sm text-muted-foreground">
-        The platform admin API refused or is unreachable. Reading this screen needs the{" "}
-        <code className="font-mono text-xs">admin.role.read</code> permission — an account that can
-        open the console does not necessarily hold it.
-      </p>
-      <ShieldCheck className="mt-2 size-4 text-muted-foreground" />
-    </div>
+    <DetailShell>
+      <div className="flex flex-col items-center gap-2 rounded-md border p-10 text-center">
+        <AlertCircle className="size-8 text-destructive" />
+        <p className="font-medium">Could not load roles</p>
+        <p className="max-w-md text-sm text-muted-foreground">
+          The platform admin API refused or is unreachable. Reading this screen needs the{" "}
+          <code className="font-mono text-xs">admin.role.read</code> permission — an account that can
+          open the console does not necessarily hold it.
+        </p>
+        <ShieldCheck className="mt-2 size-4 text-muted-foreground" />
+      </div>
+    </DetailShell>
   );
 }
