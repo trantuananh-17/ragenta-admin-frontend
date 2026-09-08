@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Sparkles,
   Ticket,
+  TrendingUp,
   UserCircle,
 } from "lucide-react";
 
@@ -62,6 +63,7 @@ const menuGroups: MenuGroup[] = [
   {
     label: "Billing",
     items: [
+      { title: "Usage", icon: TrendingUp, url: "/admin/usage" },
       { title: "Plans", icon: CreditCard, url: "/admin/plans" },
       { title: "Promo codes", icon: Ticket, url: "/admin/promo-codes" },
     ],
