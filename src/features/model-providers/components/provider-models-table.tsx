@@ -62,6 +62,13 @@ export function ProviderModelsTable({ provider }: { provider: ModelProvider }) {
                 <span className="flex items-center gap-2">
                   {model.model}
                   {model.custom && <StatusBadge tone="info">custom</StatusBadge>}
+                  {/*
+                    Shown because there is otherwise nowhere to notice this is
+                    wrong. A model marked blind refuses every picture with a
+                    message naming the model, which reads like the provider's
+                    limitation rather than a row in this table.
+                  */}
+                  {model.vision && <StatusBadge tone="success">vision</StatusBadge>}
                 </span>
               </TableCell>
               <TableCell className="text-sm">{model.capability}</TableCell>

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ const schema = z.object({
   tier: z.enum(["economy", "premium"]),
   contextWindow: z.number().int().positive().optional(),
   embeddingDimensions: z.number().int().positive().optional(),
+  vision: z.boolean(),
   inputPerMillion: z.number().nonnegative(),
   outputPerMillion: z.number().nonnegative(),
   embeddingPerMillion: z.number().nonnegative(),
@@ -57,6 +59,7 @@ const defaults: FormValues = {
   tier: "premium",
   contextWindow: undefined,
   embeddingDimensions: undefined,
+  vision: false,
   inputPerMillion: 0,
   outputPerMillion: 0,
   embeddingPerMillion: 0,
@@ -91,6 +94,7 @@ export function AddModelDialog({
 
   const capability = watch("capability");
   const tier = watch("tier");
+  const vision = watch("vision");
 
   return (
     <Dialog
@@ -120,6 +124,7 @@ export function AddModelDialog({
                 tier: values.tier,
                 contextWindow: values.contextWindow ?? null,
                 embeddingDimensions: values.embeddingDimensions ?? null,
+                vision: values.capability === "chat" ? values.vision : null,
                 rates: {
                   inputPerMillion: values.inputPerMillion,
                   outputPerMillion: values.outputPerMillion,
@@ -224,6 +229,23 @@ export function AddModelDialog({
                   min={0}
                   {...register("outputPerMillion", { valueAsNumber: true })}
                 />
+              </div>
+              <div className="flex items-start gap-2.5 sm:col-span-3">
+                <Checkbox
+                  id="model-vision"
+                  checked={vision}
+                  onCheckedChange={(next) => setValue("vision", next === true)}
+                />
+                <div className="grid gap-1">
+                  <Label htmlFor="model-vision" className="font-normal">
+                    Reads images
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Leave it off unless the provider says so. A model that
+                    cannot see still answers when sent a picture — fluently,
+                    billably, and about the caption alone.
+                  </p>
+                </div>
               </div>
             </div>
           ) : (

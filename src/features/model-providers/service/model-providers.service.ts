@@ -78,6 +78,8 @@ export const providerModelSchema = z.object({
   capability: z.string(),
   tier: modelTierSchema,
   contextWindow: z.number().nullable(),
+  /** Whether it reads images. Resolved by the backend, so a plain boolean here. */
+  vision: z.boolean().default(false),
   /** Embedding models only. It decides which vector collection they index into. */
   embeddingDimensions: z.number().nullable(),
   rates: ratesSchema,
@@ -205,6 +207,8 @@ export interface UpsertModelInput {
   tier: ModelTier;
   contextWindow: number | null;
   embeddingDimensions: number | null;
+  /** Only meaningful for a chat model; null leaves the catalogue's own answer standing. */
+  vision: boolean | null;
   rates: ModelRates;
 }
 
@@ -278,6 +282,7 @@ export async function upsertModel(
       tier: input.tier,
       contextWindow: input.contextWindow,
       embeddingDimensions: input.embeddingDimensions,
+      vision: input.vision,
       inputPerMillion: input.rates.inputPerMillion,
       outputPerMillion: input.rates.outputPerMillion,
       embeddingPerMillion: input.rates.embeddingPerMillion,
