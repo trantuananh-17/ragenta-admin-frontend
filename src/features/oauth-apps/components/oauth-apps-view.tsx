@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AlertCircle, Check, Loader2 } from "lucide-react";
 
 import { CopyButton } from "@/components/copy-button";
+import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ export function OAuthAppsView() {
   const unconfigured = providers.filter((provider) => !provider.configured).length;
 
   return (
-    <>
+    <DetailShell>
       <PageHeader
         title="Connected apps"
         description="The OAuth apps this deployment authorises with. A workspace can only connect a Google or Slack account once the matching app is registered here."
@@ -57,7 +58,7 @@ export function OAuthAppsView() {
           />
         ))}
       </div>
-    </>
+    </DetailShell>
   );
 }
 
@@ -177,29 +178,33 @@ function RegistrationBadge({ provider }: { provider: OAuthProvider }) {
 
 export function OAuthAppsLoading() {
   return (
-    <div className="space-y-4">
-      <Skeleton className="h-8 w-48" />
-      <div className="grid gap-4 xl:grid-cols-2">
-        <Skeleton className="h-72" />
-        <Skeleton className="h-72" />
+    <DetailShell>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid gap-4 xl:grid-cols-2">
+          <Skeleton className="h-72" />
+          <Skeleton className="h-72" />
+        </div>
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" />
+          Loading connected apps...
+        </p>
       </div>
-      <p className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
-        Loading connected apps...
-      </p>
-    </div>
+    </DetailShell>
   );
 }
 
 export function OAuthAppsError() {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-md border p-10 text-center">
-      <AlertCircle className="size-8 text-destructive" />
-      <p className="font-medium">Could not load connected apps</p>
-      <p className="max-w-md text-sm text-muted-foreground">
-        The platform admin API refused or is unreachable. This screen needs the{" "}
-        <code className="font-mono text-xs">admin.oauth.read</code> permission.
-      </p>
-    </div>
+    <DetailShell>
+      <div className="flex flex-col items-center gap-2 rounded-md border p-10 text-center">
+        <AlertCircle className="size-8 text-destructive" />
+        <p className="font-medium">Could not load connected apps</p>
+        <p className="max-w-md text-sm text-muted-foreground">
+          The platform admin API refused or is unreachable. This screen needs the{" "}
+          <code className="font-mono text-xs">admin.oauth.read</code> permission.
+        </p>
+      </div>
+    </DetailShell>
   );
 }

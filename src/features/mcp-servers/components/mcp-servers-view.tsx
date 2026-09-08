@@ -5,6 +5,7 @@ import { AlertCircle, Loader2, Plus, RefreshCw, Server, Trash2 } from "lucide-re
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { CopyButton } from "@/components/copy-button";
+import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,7 @@ export function McpServersView() {
   const remove = useDeleteMcpServer();
 
   return (
-    <>
+    <DetailShell>
       <PageHeader
         title="MCP servers"
         description="Tool servers every workspace's agents can reach, over the Model Context Protocol."
@@ -104,7 +105,7 @@ export function McpServersView() {
           });
         }}
       />
-    </>
+    </DetailShell>
   );
 }
 
@@ -452,26 +453,30 @@ function ServerForm({ server, onDone }: { server?: McpServer; onDone: () => void
 
 export function McpServersLoading() {
   return (
-    <div className="space-y-4">
-      <Skeleton className="h-8 w-48" />
-      <Skeleton className="h-56" />
-      <p className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
-        Loading MCP servers...
-      </p>
-    </div>
+    <DetailShell>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-56" />
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" />
+          Loading MCP servers...
+        </p>
+      </div>
+    </DetailShell>
   );
 }
 
 export function McpServersError() {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-md border p-10 text-center">
-      <AlertCircle className="size-8 text-destructive" />
-      <p className="font-medium">Could not load MCP servers</p>
-      <p className="max-w-md text-sm text-muted-foreground">
-        The platform admin API refused or is unreachable. This screen needs the{" "}
-        <code className="font-mono text-xs">admin.mcp.read</code> permission.
-      </p>
-    </div>
+    <DetailShell>
+      <div className="flex flex-col items-center gap-2 rounded-md border p-10 text-center">
+        <AlertCircle className="size-8 text-destructive" />
+        <p className="font-medium">Could not load MCP servers</p>
+        <p className="max-w-md text-sm text-muted-foreground">
+          The platform admin API refused or is unreachable. This screen needs the{" "}
+          <code className="font-mono text-xs">admin.mcp.read</code> permission.
+        </p>
+      </div>
+    </DetailShell>
   );
 }

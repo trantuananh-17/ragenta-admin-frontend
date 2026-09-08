@@ -1,5 +1,6 @@
 "use client";
 
+import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSpeechSettingsSuspense } from "../hooks/speech.hook";
@@ -33,7 +34,7 @@ export function SpeechView() {
   const { data } = useSpeechSettingsSuspense();
 
   return (
-    <>
+    <DetailShell>
       <PageHeader
         title="Speech"
         description="Where recordings are turned into words, and words into audio. Both halves speak the OpenAI audio API, so either can point at a hosted gateway or a container running on this network."
@@ -63,17 +64,19 @@ export function SpeechView() {
         customer app rather than failing: the microphone is not offered, and no
         answer carries a read-aloud button.
       </p>
-    </>
+    </DetailShell>
   );
 }
 
 export function SpeechLoading() {
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
-      {[0, 1].map((card) => (
-        <Skeleton key={card} className="h-80 rounded-lg" />
-      ))}
-    </div>
+    <DetailShell>
+      <div className="grid gap-4 xl:grid-cols-2">
+        {[0, 1].map((card) => (
+          <Skeleton key={card} className="h-80 rounded-lg" />
+        ))}
+      </div>
+    </DetailShell>
   );
 }
 

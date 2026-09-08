@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plug, Plus } from "lucide-react";
 
+import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ export function IntegrationsView() {
   const current = data.find((entry) => entry.id === editing) ?? null;
 
   return (
-    <>
+    <DetailShell>
       <PageHeader
         title="Connections"
         description="Outside systems an agent may reach. Each one carries its own limits — which methods, which paths, which recipients — and an agent can never widen them."
@@ -73,7 +74,7 @@ export function IntegrationsView() {
           setEditing(null);
         }}
       />
-    </>
+    </DetailShell>
   );
 }
 
@@ -90,11 +91,13 @@ export function KindBadge({ kind }: { kind: string }) {
 
 export function IntegrationsLoading() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {[0, 1, 2].map((card) => (
-        <Skeleton key={card} className="h-44 rounded-lg" />
-      ))}
-    </div>
+    <DetailShell>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {[0, 1, 2].map((card) => (
+          <Skeleton key={card} className="h-44 rounded-lg" />
+        ))}
+      </div>
+    </DetailShell>
   );
 }
 

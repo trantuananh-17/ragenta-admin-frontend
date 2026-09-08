@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AlertCircle, Boxes, Building2, Coins, Cpu, Loader2 } from "lucide-react";
 
+import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { StatCard, StatCardGrid } from "@/components/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,7 +41,7 @@ export function PlatformUsageView() {
   const totals = data.totals;
 
   return (
-    <>
+    <DetailShell>
       <PageHeader
         title="Usage"
         description="Every provider call this deployment has billed, across every workspace."
@@ -231,7 +232,7 @@ export function PlatformUsageView() {
           </section>
         </div>
       </div>
-    </>
+    </DetailShell>
   );
 }
 
@@ -277,33 +278,37 @@ function DailyTrend({ rows }: { rows: DailyUsage[] }) {
 
 export function PlatformUsageLoading() {
   return (
-    <div className="space-y-4">
-      <Skeleton className="h-8 w-40" />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Skeleton className="h-24" />
-        <Skeleton className="h-24" />
-        <Skeleton className="h-24" />
-        <Skeleton className="h-24" />
+    <DetailShell>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-40" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+        <Skeleton className="h-64" />
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" />
+          Adding up what has been spent...
+        </p>
       </div>
-      <Skeleton className="h-64" />
-      <p className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
-        Adding up what has been spent...
-      </p>
-    </div>
+    </DetailShell>
   );
 }
 
 export function PlatformUsageError() {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-md border p-10 text-center">
-      <AlertCircle className="size-8 text-destructive" />
-      <p className="font-medium">Could not load usage</p>
-      <p className="max-w-md text-sm text-muted-foreground">
-        The platform admin API refused or is unreachable. This screen needs the{" "}
-        <code className="font-mono text-xs">admin.usage.read</code> permission, which the support
-        role deliberately does not hold.
-      </p>
-    </div>
+    <DetailShell>
+      <div className="flex flex-col items-center gap-2 rounded-md border p-10 text-center">
+        <AlertCircle className="size-8 text-destructive" />
+        <p className="font-medium">Could not load usage</p>
+        <p className="max-w-md text-sm text-muted-foreground">
+          The platform admin API refused or is unreachable. This screen needs the{" "}
+          <code className="font-mono text-xs">admin.usage.read</code> permission, which the support
+          role deliberately does not hold.
+        </p>
+      </div>
+    </DetailShell>
   );
 }
