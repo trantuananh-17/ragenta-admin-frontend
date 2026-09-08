@@ -16,6 +16,7 @@ import {
   Plug,
   ScrollText,
   Settings2,
+  ShieldCheck,
   Sparkles,
   Ticket,
   UserCircle,
@@ -51,6 +52,7 @@ const menuGroups: MenuGroup[] = [
     label: "Platform",
     items: [
       { title: "Users", icon: UserCircle, url: "/admin/users" },
+      { title: "Roles", icon: ShieldCheck, url: "/admin/roles" },
       { title: "Workspaces", icon: Building2, url: "/admin/workspaces" },
       { title: "Models", icon: Boxes, url: "/admin/models" },
       { title: "Connections", icon: Plug, url: "/admin/integrations" },
