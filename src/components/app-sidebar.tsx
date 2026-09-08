@@ -16,8 +16,10 @@ import {
   Plug,
   ScrollText,
   Settings2,
+  ShieldCheck,
   Sparkles,
   Ticket,
+  TrendingUp,
   UserCircle,
 } from "lucide-react";
 
@@ -51,6 +53,7 @@ const menuGroups: MenuGroup[] = [
     label: "Platform",
     items: [
       { title: "Users", icon: UserCircle, url: "/admin/users" },
+      { title: "Roles", icon: ShieldCheck, url: "/admin/roles" },
       { title: "Workspaces", icon: Building2, url: "/admin/workspaces" },
       { title: "Models", icon: Boxes, url: "/admin/models" },
       { title: "Connections", icon: Plug, url: "/admin/integrations" },
@@ -60,6 +63,7 @@ const menuGroups: MenuGroup[] = [
   {
     label: "Billing",
     items: [
+      { title: "Usage", icon: TrendingUp, url: "/admin/usage" },
       { title: "Plans", icon: CreditCard, url: "/admin/plans" },
       { title: "Promo codes", icon: Ticket, url: "/admin/promo-codes" },
     ],
