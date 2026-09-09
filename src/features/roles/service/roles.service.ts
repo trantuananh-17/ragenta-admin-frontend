@@ -33,6 +33,26 @@ export const roleSchema = z.object({
   permissions: z.array(z.string()),
 });
 
+/**
+ * A role as the assignment endpoints answer it — the same row without its
+ * permission keys, which those endpoints do not join. What a role may do is read
+ * on the Roles screen; this shape is only ever asked "which roles does this
+ * subject hold".
+ */
+export const assignedRoleSchema = z.object({
+  id: z.string(),
+  organizationId: z.string().nullable(),
+  scope: z.string(),
+  key: z.string(),
+  name: z.string(),
+  description: z.string(),
+  isSystem: z.boolean(),
+});
+
+export type AssignedRole = z.infer<typeof assignedRoleSchema>;
+
+export const assignedRolesResponse = z.object({ roles: z.array(assignedRoleSchema) });
+
 const permissionsResponse = z.object({ permissions: z.array(permissionSchema) });
 const rolesResponse = z.object({ roles: z.array(roleSchema) });
 const roleResponse = z.object({ role: roleSchema });
@@ -45,8 +65,16 @@ export async function getPermissions(): Promise<Permission[]> {
   return permissionsResponse.parse(await response.json()).permissions;
 }
 
-export async function getRoles(): Promise<Role[]> {
-  const response = await api.get("admin/roles");
+/**
+ * Passing a workspace widens the answer to that workspace's own roles as well as
+ * the built-in ones. Without it the backend returns only what the platform owns,
+ * which is what the Roles screen wants and is deliberately not enough to assign
+ * a role inside one tenant.
+ */
+export async function getRoles(workspaceId?: string): Promise<Role[]> {
+  const response = await api.get("admin/roles", {
+    searchParams: workspaceId ? { workspaceId } : undefined,
+  });
   return rolesResponse.parse(await response.json()).roles;
 }
 

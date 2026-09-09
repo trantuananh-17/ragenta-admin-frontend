@@ -14,6 +14,7 @@ import { formatCredits, formatDateTime, formatUsd } from "@/lib/format";
 import { AdjustCreditsDialog } from "./adjust-credits-dialog";
 import { ChangePlanDialog } from "./change-plan-dialog";
 import { PlanBadge } from "./plan-badge";
+import { WorkspaceMembers } from "./workspace-members";
 
 export function WorkspaceDetail({ workspaceId }: { workspaceId: string }) {
   const { data } = useWorkspaceSuspense(workspaceId);
@@ -91,6 +92,8 @@ export function WorkspaceDetail({ workspaceId }: { workspaceId: string }) {
           ]}
         />
       </DetailSection>
+
+      <WorkspaceMembers workspaceId={workspace.id} />
 
       <DetailSection
         title="Plan and entitlements"

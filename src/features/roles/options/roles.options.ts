@@ -8,15 +8,16 @@ import { getPermissions, getRoles } from "../service/roles.service";
  */
 export const rolesKeys = {
   all: () => ["roles"] as const,
-  list: () => [...rolesKeys.all(), "list"] as const,
+  list: (workspaceId?: string) =>
+    [...rolesKeys.all(), "list", workspaceId ?? null] as const,
   permissions: () => ["permissions"] as const,
 };
 
 export const rolesOptions = {
-  list: () =>
+  list: (workspaceId?: string) =>
     queryOptions({
-      queryKey: rolesKeys.list(),
-      queryFn: getRoles,
+      queryKey: rolesKeys.list(workspaceId),
+      queryFn: () => getRoles(workspaceId),
     }),
   /**
    * The catalogue changes only when a release does, so it is worth holding on to

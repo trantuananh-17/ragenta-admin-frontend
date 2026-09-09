@@ -2,6 +2,10 @@ import { z } from "zod";
 
 import { api } from "@/lib/ky";
 import { pageSchema, toOffset } from "@/lib/pagination";
+import {
+  assignedRolesResponse,
+  type AssignedRole,
+} from "@/features/roles/service/roles.service";
 import type { UsersParams } from "../params";
 
 /**
@@ -34,6 +38,28 @@ export async function getUsers(params: UsersParams): Promise<UsersPage> {
 
   const response = await api.get("admin/users", { searchParams });
   return usersPageSchema.parse(await response.json());
+}
+
+/**
+ * `/v1/admin/users/:id/platform-roles` — what somebody may do in this console.
+ *
+ * Separate from `user.role`, which the account menu writes: that column is Better
+ * Auth's and is all-or-nothing, while these are the four graduated roles the
+ * backend actually resolves permissions from (ADR-046).
+ */
+export async function getUserPlatformRoles(userId: string): Promise<AssignedRole[]> {
+  const response = await api.get(`admin/users/${userId}/platform-roles`);
+  return assignedRolesResponse.parse(await response.json()).roles;
+}
+
+export async function setUserPlatformRoles(
+  userId: string,
+  roleIds: string[],
+): Promise<AssignedRole[]> {
+  const response = await api.put(`admin/users/${userId}/platform-roles`, {
+    json: { roleIds },
+  });
+  return assignedRolesResponse.parse(await response.json()).roles;
 }
 
 export function roleList(role: string | null): string[] {

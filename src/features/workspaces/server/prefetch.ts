@@ -9,5 +9,9 @@ export async function prefetchWorkspaces(params: WorkspacesParams) {
 }
 
 export async function prefetchWorkspace(workspaceId: string) {
-  await getQueryClient().prefetchQuery(workspacesOptions.detail(workspaceId));
+  const queryClient = getQueryClient();
+  await Promise.all([
+    queryClient.prefetchQuery(workspacesOptions.detail(workspaceId)),
+    queryClient.prefetchQuery(workspacesOptions.members(workspaceId)),
+  ]);
 }

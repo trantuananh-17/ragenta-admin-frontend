@@ -2,6 +2,7 @@
 
 import {
   useMutation,
+  useQuery,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
@@ -11,6 +12,7 @@ import { errorMessage } from "@/lib/api-error";
 import { workspacesKeys, workspacesOptions } from "../options/workspaces.options";
 import {
   adjustCredits,
+  setMemberRoles,
   setWorkspacePlan,
   type AdjustCreditsInput,
 } from "../service/workspaces.service";
@@ -22,6 +24,32 @@ export function useWorkspacesSuspense(params: WorkspacesParams) {
 
 export function useWorkspaceSuspense(workspaceId: string) {
   return useSuspenseQuery(workspacesOptions.detail(workspaceId));
+}
+
+export function useWorkspaceMembersSuspense(workspaceId: string) {
+  return useSuspenseQuery(workspacesOptions.members(workspaceId));
+}
+
+/** Only fetched while one membership's dialog is open. */
+export function useMemberRoles(workspaceId: string, memberId: string, enabled: boolean) {
+  return useQuery({ ...workspacesOptions.memberRoles(workspaceId, memberId), enabled });
+}
+
+export function useSetMemberRoles(workspaceId: string, memberId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (roleIds: string[]) => setMemberRoles(workspaceId, memberId, roleIds),
+    onSuccess: () => {
+      toast.success("Member roles saved.");
+      queryClient.invalidateQueries({
+        queryKey: workspacesKeys.members(workspaceId),
+      });
+    },
+    onError: async (error) => {
+      toast.error("Could not save roles", { description: await errorMessage(error) });
+    },
+  });
 }
 
 export function useAdjustCredits(workspaceId: string) {

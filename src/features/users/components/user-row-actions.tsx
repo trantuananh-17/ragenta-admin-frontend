@@ -24,6 +24,7 @@ import {
   isPlatformAdmin,
   type AdminUser,
 } from "@/features/users/service/users.service";
+import { PlatformRolesDialog } from "./platform-roles-dialog";
 
 type PendingAction = "grant-admin" | "revoke-admin" | "ban" | "unban" | "sessions";
 
@@ -34,6 +35,7 @@ type PendingAction = "grant-admin" | "revoke-admin" | "ban" | "unban" | "session
  */
 export function UserRowActions({ user }: { user: AdminUser }) {
   const [action, setAction] = useState<PendingAction | null>(null);
+  const [rolesOpen, setRolesOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
 
   const setRole = useSetUserRole();
@@ -84,6 +86,9 @@ export function UserRowActions({ user }: { user: AdminUser }) {
               Make platform admin
             </DropdownMenuItem>
           )}
+          <DropdownMenuItem onSelect={() => setRolesOpen(true)}>
+            Platform roles
+          </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setAction("sessions")}>
             Revoke all sessions
           </DropdownMenuItem>
@@ -102,6 +107,8 @@ export function UserRowActions({ user }: { user: AdminUser }) {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <PlatformRolesDialog user={user} open={rolesOpen} onOpenChange={setRolesOpen} />
 
       <ConfirmDialog
         open={action === "grant-admin"}

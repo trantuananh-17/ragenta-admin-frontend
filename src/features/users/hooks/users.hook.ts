@@ -1,14 +1,44 @@
 "use client";
 
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { errorMessage } from "@/lib/api-error";
 import { authClient } from "@/lib/auth-client";
 import { usersOptions, usersKeys } from "../options/users.options";
+import { setUserPlatformRoles } from "../service/users.service";
 import type { UsersParams } from "../params";
 
 export function useUsersSuspense(params: UsersParams) {
   return useSuspenseQuery(usersOptions.list(params));
+}
+
+/** Only fetched while the assignment dialog is open — one row out of a page of them. */
+export function useUserPlatformRoles(userId: string, enabled: boolean) {
+  return useQuery({ ...usersOptions.platformRoles(userId), enabled });
+}
+
+export function useSetUserPlatformRoles(userId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (roleIds: string[]) => setUserPlatformRoles(userId, roleIds),
+    onSuccess: () => {
+      toast.success("Platform roles saved.");
+      queryClient.invalidateQueries({ queryKey: usersKeys.all() });
+    },
+    // The backend refuses to remove the last super administrator, and refuses a
+    // role carrying a permission the actor does not hold. Both say what to do
+    // instead, so the sentence is shown rather than replaced.
+    onError: async (error) => {
+      toast.error("Could not save roles", { description: await errorMessage(error) });
+    },
+  });
 }
 
 /**

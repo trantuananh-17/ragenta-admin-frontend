@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 
-import { getUsers } from "../service/users.service";
+import { getUserPlatformRoles, getUsers } from "../service/users.service";
 import type { UsersParams } from "../params";
 
 /**
@@ -10,6 +10,8 @@ import type { UsersParams } from "../params";
 export const usersKeys = {
   all: () => ["users"] as const,
   list: (params: UsersParams) => [...usersKeys.all(), "list", params] as const,
+  platformRoles: (userId: string) =>
+    [...usersKeys.all(), "platform-roles", userId] as const,
 };
 
 export const usersOptions = {
@@ -17,5 +19,10 @@ export const usersOptions = {
     queryOptions({
       queryKey: usersKeys.list(params),
       queryFn: () => getUsers(params),
+    }),
+  platformRoles: (userId: string) =>
+    queryOptions({
+      queryKey: usersKeys.platformRoles(userId),
+      queryFn: () => getUserPlatformRoles(userId),
     }),
 };

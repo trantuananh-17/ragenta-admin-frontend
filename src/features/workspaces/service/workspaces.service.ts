@@ -2,6 +2,10 @@ import { z } from "zod";
 
 import { api } from "@/lib/ky";
 import { pageSchema, toOffset } from "@/lib/pagination";
+import {
+  assignedRolesResponse,
+  type AssignedRole,
+} from "@/features/roles/service/roles.service";
 import type { WorkspacesParams } from "../params";
 
 /**
@@ -114,6 +118,58 @@ export async function adjustCredits(
   input: AdjustCreditsInput,
 ): Promise<void> {
   await api.post(`admin/workspaces/${workspaceId}/credits`, { json: input });
+}
+
+/**
+ * A membership, not an account. Workspace roles hang off `member.id`, so the same
+ * person in two workspaces is two rows here with two independent role sets.
+ */
+export const workspaceMemberSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  name: z.string(),
+  email: z.string(),
+  /** Better Auth's own column; the built-in role Ragenta grants follows it. */
+  role: z.string(),
+  createdAt: z.coerce.string(),
+});
+
+const membersResponse = z.object({ members: z.array(workspaceMemberSchema) });
+
+export type WorkspaceMember = z.infer<typeof workspaceMemberSchema>;
+
+export async function getWorkspaceMembers(
+  workspaceId: string,
+): Promise<WorkspaceMember[]> {
+  const response = await api.get(`admin/workspaces/${workspaceId}/members`);
+  return membersResponse.parse(await response.json()).members;
+}
+
+export async function getMemberRoles(
+  workspaceId: string,
+  memberId: string,
+): Promise<AssignedRole[]> {
+  const response = await api.get(
+    `admin/workspaces/${workspaceId}/members/${memberId}/roles`,
+  );
+  return assignedRolesResponse.parse(await response.json()).roles;
+}
+
+/**
+ * The set replaces what the membership holds, and it must still contain the
+ * member's current built-in role — the backend refuses otherwise, because that
+ * one follows Better Auth's `member.role` and this endpoint is not its writer.
+ */
+export async function setMemberRoles(
+  workspaceId: string,
+  memberId: string,
+  roleIds: string[],
+): Promise<AssignedRole[]> {
+  const response = await api.put(
+    `admin/workspaces/${workspaceId}/members/${memberId}/roles`,
+    { json: { roleIds } },
+  );
+  return assignedRolesResponse.parse(await response.json()).roles;
 }
 
 export async function setWorkspacePlan(
