@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, Boxes, Building2, Coins, Cpu, Loader2 } from "lucide-react";
+import { AlertCircle, Boxes, Building2, Coins, Cpu, Loader2, Wallet } from "lucide-react";
 
 import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { usePlatformUsageSuspense } from "../hooks/platform-usage.hook";
 import {
+  formatCost,
   formatCount,
   formatCredits,
   totalTokens,
@@ -76,6 +77,12 @@ export function PlatformUsageView() {
             icon={<Coins className="size-4" />}
           />
           <StatCard
+            label="Provider cost"
+            value={totals ? formatCost(totals.costUsd) : "$0"}
+            hint="What we were charged for the same calls"
+            icon={<Wallet className="size-4" />}
+          />
+          <StatCard
             label="Tokens"
             value={totals ? formatCount(totalTokens(totals)) : "0"}
             hint="What the providers counted"
@@ -115,13 +122,14 @@ export function PlatformUsageView() {
                   <TableHead className="text-right">Out</TableHead>
                   <TableHead className="text-right">Embedding</TableHead>
                   <TableHead className="text-right">Credits</TableHead>
+                  <TableHead className="text-right">Cost</TableHead>
                   <TableHead className="text-right">Workspaces</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data.models.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-8 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={8} className="py-8 text-center text-sm text-muted-foreground">
                       Nothing was billed in this range.
                     </TableCell>
                   </TableRow>
@@ -146,6 +154,9 @@ export function PlatformUsageView() {
                       </TableCell>
                       <TableCell className="text-right font-medium tabular-nums">
                         {formatCredits(row.credits)}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">
+                        {formatCost(row.costUsd)}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">{row.workspaces}</TableCell>
                     </TableRow>
@@ -172,6 +183,7 @@ export function PlatformUsageView() {
                     <TableHead className="text-right">Calls</TableHead>
                     <TableHead className="text-right">Tokens</TableHead>
                     <TableHead className="text-right">Credits</TableHead>
+                    <TableHead className="text-right">Cost</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -186,6 +198,9 @@ export function PlatformUsageView() {
                       </TableCell>
                       <TableCell className="text-right font-medium tabular-nums">
                         {formatCredits(row.credits)}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">
+                        {formatCost(row.costUsd)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -209,6 +224,7 @@ export function PlatformUsageView() {
                     <TableHead className="text-right">Calls</TableHead>
                     <TableHead className="text-right">Tokens</TableHead>
                     <TableHead className="text-right">Credits</TableHead>
+                    <TableHead className="text-right">Cost</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -223,6 +239,9 @@ export function PlatformUsageView() {
                       </TableCell>
                       <TableCell className="text-right font-medium tabular-nums">
                         {formatCredits(row.credits)}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">
+                        {formatCost(row.costUsd)}
                       </TableCell>
                     </TableRow>
                   ))}

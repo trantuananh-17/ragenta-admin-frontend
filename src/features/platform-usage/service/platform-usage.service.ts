@@ -20,6 +20,8 @@ const countsSchema = {
   outputTokens: z.string(),
   embeddingTokens: z.string(),
   credits: z.string(),
+  /** What the providers charged us over the same rows, frozen per call. */
+  costUsd: z.string(),
 };
 
 export const modelUsageSchema = z.object({
@@ -85,6 +87,21 @@ export function formatCount(value: string, style: "compact" | "full" = "compact"
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return value;
   return style === "compact" ? compact.format(parsed) : full.format(parsed);
+}
+
+/**
+ * Provider cost, which spans six orders of magnitude on one screen: a single
+ * chat turn costs $0.002 while a quarter across every workspace costs hundreds.
+ * Two decimals would print most rows as "$0.00" and six would make the total
+ * unreadable, so the size of the number picks the precision.
+ */
+export function formatCost(value: string): string {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return value;
+  if (parsed === 0) return "$0";
+  if (parsed < 0.01) return `$${parsed.toFixed(4)}`;
+  if (parsed < 1) return `$${parsed.toFixed(3)}`;
+  return `$${parsed.toLocaleString("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 /** Credits are whole numbers in practice; the fraction exists for pricing, not for reading. */
