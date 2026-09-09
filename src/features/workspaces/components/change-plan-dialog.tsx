@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Dialog,
   DialogContent,
@@ -94,7 +95,8 @@ export function ChangePlanDialog({
               setPlan.mutate(plan, { onSuccess: () => onOpenChange(false) })
             }
           >
-            {setPlan.isPending ? "Changing..." : "Change plan"}
+            {setPlan.isPending && <Spinner data-icon="inline-start" />}
+            Change plan
           </Button>
         </DialogFooter>
       </DialogContent>

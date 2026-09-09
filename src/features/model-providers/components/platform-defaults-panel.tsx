@@ -5,6 +5,7 @@ import { useState } from "react";
 import { DetailSection } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -148,7 +149,8 @@ export function PlatformDefaultsPanel({
             disabled={!dirty || save.isPending}
             onClick={() => save.mutate(draft)}
           >
-            {save.isPending ? "Saving..." : "Save defaults"}
+            {save.isPending && <Spinner data-icon="inline-start" />}
+              Save defaults
           </Button>
         }
       >

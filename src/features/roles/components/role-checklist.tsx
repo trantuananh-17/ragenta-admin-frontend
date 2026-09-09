@@ -53,7 +53,7 @@ export function RoleChecklist({
               <p className="text-xs text-muted-foreground">
                 {role.description || <span className="italic">No description.</span>}
               </p>
-              <p className="font-mono text-[11px] text-muted-foreground/80">{role.key}</p>
+              <p className="font-mono text-xs text-muted-foreground/80">{role.key}</p>
             </div>
           </li>
         );

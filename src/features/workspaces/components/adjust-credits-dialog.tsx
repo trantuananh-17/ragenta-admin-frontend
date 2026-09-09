@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Dialog,
   DialogContent,
@@ -178,7 +179,8 @@ export function AdjustCreditsDialog({
             Cancel
           </Button>
           <Button type="submit" form="adjust-credits" disabled={adjust.isPending}>
-            {adjust.isPending ? "Applying..." : "Apply adjustment"}
+            {adjust.isPending && <Spinner data-icon="inline-start" />}
+            Apply adjustment
           </Button>
         </DialogFooter>
       </DialogContent>

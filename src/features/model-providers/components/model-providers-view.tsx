@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, TriangleAlert } from "lucide-react";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
 import { EntityStateView } from "@/components/entity-components";
 import { useProvidersSuspense } from "../hooks/model-providers.hook";
 import { PlanModelAccessPanel } from "./plan-model-access-panel";
@@ -37,16 +39,17 @@ export function ModelProvidersView() {
             rather than writing one in the clear. Saying so here is the only way
             an operator finds out why the save button will not work. */}
         {!data.encryptionConfigured && (
-          <div className="rounded-lg border border-amber-500/25 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-300">
-            <p className="font-medium">Keys cannot be stored on this deployment</p>
-            <p className="text-amber-800/80 dark:text-amber-300/80">
+          <Alert variant="warning">
+            <TriangleAlert />
+            <AlertTitle>Keys cannot be stored on this deployment</AlertTitle>
+            <AlertDescription>
               <code>SECRETS_ENCRYPTION_KEY</code> is unset, so the backend
               refuses to save a provider key rather than writing it unencrypted.
               Set it (<code>openssl rand -base64 32</code>) and restart the API
               and worker. Keys already supplied as environment variables keep
               working.
-            </p>
-          </div>
+            </AlertDescription>
+          </Alert>
         )}
 
         {selection === null ? (
@@ -68,7 +71,7 @@ export function ModelProvidersView() {
 export function ModelProvidersLoading() {
   return (
     <div className="flex h-full items-center justify-center">
-      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      <Spinner className="size-8 text-muted-foreground" />
     </div>
   );
 }

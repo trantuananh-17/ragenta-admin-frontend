@@ -1,14 +1,13 @@
-import { AlertCircle, FileText, Loader2 } from "lucide-react";
+import { AlertCircle, FileText } from "lucide-react";
 
-import { EntityStateView } from "@/components/entity-components";
+import {
+  EntityStateView,
+  EntityTableSkeleton,
+} from "@/components/entity-components";
+import { Spinner } from "@/components/ui/spinner";
 
 export function PostsLoading() {
-  return (
-    <EntityStateView
-      icon={<Loader2 className="size-8 animate-spin text-muted-foreground" />}
-      title="Loading posts..."
-    />
-  );
+  return <EntityTableSkeleton columns={4} />;
 }
 
 export function PostsEmpty() {
@@ -34,7 +33,7 @@ export function PostsError() {
 export function PostDetailLoading() {
   return (
     <div className="flex h-full items-center justify-center">
-      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      <Spinner className="size-8 text-muted-foreground" />
     </div>
   );
 }

@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, Check, Loader2 } from "lucide-react";
+import { AlertCircle, Check, TriangleAlert } from "lucide-react";
 
 import { CopyButton } from "@/components/copy-button";
 import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { useOAuthProvidersSuspense, useSaveOAuthClient } from "../hooks/oauth-apps.hook";
 import type { OAuthProvider } from "../service/oauth-apps.service";
@@ -37,11 +39,14 @@ export function OAuthAppsView() {
       />
 
       {unconfigured > 0 && (
-        <p className="mt-4 rounded-md border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-300">
-          {unconfigured === providers.length
-            ? "No provider is registered, so every Gmail, Drive, Calendar, Sheets, Slack, GitHub and Notion tool currently refuses."
-            : `${unconfigured} of ${providers.length} providers are not registered. Their tools refuse until they are.`}
-        </p>
+        <Alert variant="warning" className="mt-4">
+          <TriangleAlert />
+          <AlertDescription>
+            {unconfigured === providers.length
+              ? "No provider is registered, so every Gmail, Drive, Calendar, Sheets, Slack, GitHub and Notion tool currently refuses."
+              : ` of  providers are not registered. Their tools refuse until they are.`}
+          </AlertDescription>
+        </Alert>
       )}
 
       <div className="mt-6 grid gap-4 xl:grid-cols-2">
@@ -90,7 +95,7 @@ function ProviderCard({ provider }: { provider: OAuthProvider }) {
         <div className="space-y-1">
           <Label className="text-xs">Redirect URI to register with {provider.name}</Label>
           <div className="flex items-center gap-2">
-            <code className="min-w-0 flex-1 truncate rounded bg-muted px-2 py-1.5 font-mono text-xs">
+            <code className="min-w-0 flex-1 truncate rounded-sm bg-muted px-2 py-1.5 font-mono text-xs">
               {provider.redirectUri}
             </code>
             <CopyButton value={provider.redirectUri} />
@@ -147,7 +152,8 @@ function ProviderCard({ provider }: { provider: OAuthProvider }) {
               })
             }
           >
-            {save.isPending ? "Saving..." : "Save"}
+            {save.isPending && <Spinner data-icon="inline-start" />}
+            Save
           </Button>
         </div>
       </div>
@@ -186,7 +192,7 @@ export function OAuthAppsLoading() {
           <Skeleton className="h-72" />
         </div>
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
+          <Spinner />
           Loading connected apps...
         </p>
       </div>

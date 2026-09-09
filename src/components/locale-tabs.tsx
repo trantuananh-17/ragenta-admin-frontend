@@ -35,12 +35,12 @@ export function LocaleTabs({
           <TabsTrigger key={entry} value={entry} className="gap-2">
             {LOCALE_LABELS[entry]}
             {entry === "en" ? (
-              <StatusBadge tone="info" className="text-[10px]">
+              <StatusBadge tone="info" className="text-xs">
                 required
               </StatusBadge>
             ) : (
               !filled[entry] && (
-                <StatusBadge className="text-[10px]">empty</StatusBadge>
+                <StatusBadge className="text-xs">empty</StatusBadge>
               )
             )}
           </TabsTrigger>
@@ -64,7 +64,7 @@ export function LocaleChips({ locales }: { locales: Locale[] }) {
         <StatusBadge
           key={locale}
           tone={locales.includes(locale) ? "success" : "neutral"}
-          className="text-[10px] uppercase"
+          className="text-xs uppercase"
         >
           {locale}
         </StatusBadge>

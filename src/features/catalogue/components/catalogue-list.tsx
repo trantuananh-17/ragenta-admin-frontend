@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import type { ColumnDef } from "@tanstack/react-table";
-import { AlertCircle, Loader2, RotateCcw, Sparkles } from "lucide-react";
+import { AlertCircle, RotateCcw, Sparkles } from "lucide-react";
 
 import { ContentStatusFilter } from "@/components/content-status-filter";
 import {
@@ -13,6 +13,7 @@ import {
   EntityPagination,
   EntitySearch,
   EntityStateView,
+  EntityTableSkeleton,
 } from "@/components/entity-components";
 import { ContentStatusBadge, StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const columns: ColumnDef<CatalogueItem>[] = [
   },
   {
     id: "description",
+    meta: { priority: "secondary" },
     header: "Description",
     cell: ({ row }) => (
       <p className="line-clamp-2 max-w-md text-xs text-muted-foreground">
@@ -46,6 +48,7 @@ const columns: ColumnDef<CatalogueItem>[] = [
   },
   {
     id: "featured",
+    meta: { priority: "tertiary" },
     header: "Featured",
     cell: ({ row }) =>
       row.original.featured ? (
@@ -56,6 +59,7 @@ const columns: ColumnDef<CatalogueItem>[] = [
   },
   {
     accessorKey: "sortOrder",
+    meta: { priority: "tertiary" },
     header: "Order",
     cell: ({ row }) => (
       <span className="font-mono text-xs tabular-nums">
@@ -71,12 +75,7 @@ const columns: ColumnDef<CatalogueItem>[] = [
 ];
 
 export function CatalogueLoading() {
-  return (
-    <EntityStateView
-      icon={<Loader2 className="size-8 animate-spin text-muted-foreground" />}
-      title="Loading the catalogue..."
-    />
-  );
+  return <EntityTableSkeleton columns={5} />;
 }
 
 export function CatalogueEmpty() {

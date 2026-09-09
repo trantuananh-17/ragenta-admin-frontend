@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { DetailSection, DetailShell } from "@/components/detail-shell";
@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/page-header";
 import { StatCard, StatCardGrid } from "@/components/stat-card";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   ChartContainer,
   ChartTooltip,
@@ -31,6 +32,20 @@ export function DashboardView() {
     ? `Across the newest ${formatNumber(data.sampleSize)} of ${formatNumber(data.totalWorkspaces)} workspaces.`
     : "Across every workspace.";
 
+  // The counts on their own say nothing about whether the platform is healthy.
+  // These two relate each figure to another one already on screen, which is the
+  // most the overview endpoint can support — it returns no earlier period, so
+  // there is no honest trend to draw.
+  const accountsPerWorkspace =
+    data.totalWorkspaces > 0
+      ? `${(data.totalUsers / data.totalWorkspaces).toFixed(1)} per workspace.`
+      : undefined;
+
+  const topupShare =
+    data.creditsInSample.total > 0
+      ? `${Math.round((data.creditsInSample.topup / data.creditsInSample.total) * 100)}% of the balance. Purchased, never expires.`
+      : "Purchased, never expires.";
+
   return (
     <DetailShell>
       <PageHeader
@@ -39,8 +54,20 @@ export function DashboardView() {
       />
 
       <StatCardGrid>
-        <StatCard label="Accounts" value={formatNumber(data.totalUsers)} />
-        <StatCard label="Workspaces" value={formatNumber(data.totalWorkspaces)} />
+        <StatCard
+          label="Accounts"
+          value={formatNumber(data.totalUsers)}
+          hint={accountsPerWorkspace}
+        />
+        <StatCard
+          label="Workspaces"
+          value={formatNumber(data.totalWorkspaces)}
+          hint={
+            data.planMix.length > 0
+              ? `${data.planMix.length} ${data.planMix.length === 1 ? "plan" : "plans"} in use.`
+              : undefined
+          }
+        />
         <StatCard
           label="Credits outstanding"
           value={formatCredits(data.creditsInSample.total)}
@@ -49,7 +76,7 @@ export function DashboardView() {
         <StatCard
           label="Top-up credits"
           value={formatCredits(data.creditsInSample.topup)}
-          hint="Purchased, never expires."
+          hint={topupShare}
         />
       </StatCardGrid>
 
@@ -67,7 +94,7 @@ export function DashboardView() {
             No workspaces exist on this environment yet.
           </p>
         ) : (
-          <ChartContainer config={chartConfig} className="h-[240px] w-full">
+          <ChartContainer config={chartConfig} className="h-60 w-full">
             <BarChart data={data.planMix} layout="vertical" margin={{ left: 12 }}>
               <CartesianGrid horizontal={false} />
               <XAxis type="number" allowDecimals={false} />
@@ -101,32 +128,34 @@ export function DashboardView() {
             {data.recentActivity.map((entry) => (
               <li
                 key={entry.id}
-                className="flex flex-wrap items-center justify-between gap-2 py-2 first:pt-0 last:pb-0"
+                className="flex flex-wrap items-center justify-between gap-2 py-2.5 first:pt-0 last:pb-0"
               >
-                <div className="min-w-0">
-                  <p className="font-mono text-xs">{entry.action}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {entry.organizationId ? (
-                      <Link
-                        href={`/admin/workspaces/${entry.organizationId}`}
-                        className="hover:underline"
-                      >
-                        {entry.organizationId.slice(0, 16)}…
-                      </Link>
-                    ) : (
-                      "no workspace"
-                    )}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-2">
+                  {/* The badge leads: on a log, "did it work" is read before
+                      "what was it", and only failures need a second look. */}
                   <StatusBadge
                     tone={entry.status === "success" ? "success" : "danger"}
                   >
                     {entry.status}
                   </StatusBadge>
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {formatDateTime(entry.createdAt)}
+                  <span className="truncate font-mono text-sm">
+                    {entry.action}
                   </span>
+                </div>
+                <div className="flex min-w-0 items-center gap-3 text-xs text-muted-foreground">
+                  {entry.organizationId ? (
+                    <Link
+                      href={`/admin/workspaces/${entry.organizationId}`}
+                      className="truncate rounded-sm font-mono hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                    >
+                      {entry.organizationId.slice(0, 16)}…
+                    </Link>
+                  ) : (
+                    <span>no workspace</span>
+                  )}
+                  <time dateTime={new Date(entry.createdAt).toISOString()}>
+                    {formatDateTime(entry.createdAt)}
+                  </time>
                 </div>
               </li>
             ))}
@@ -146,7 +175,7 @@ export function DashboardView() {
 export function DashboardLoading() {
   return (
     <div className="flex h-full items-center justify-center">
-      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      <Spinner className="size-8 text-muted-foreground" />
     </div>
   );
 }

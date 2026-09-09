@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { z } from "zod";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,8 +16,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import {
   EmailNotVerifiedError,
   useGoogleSignIn,
@@ -63,41 +71,48 @@ export function LoginForm() {
       </CardHeader>
       <CardContent>
         {notAdmin && (
-          <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            That account is signed in but is not a platform administrator.
-          </div>
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle />
+            <AlertDescription>
+              That account is signed in but is not a platform administrator.
+            </AlertDescription>
+          </Alert>
         )}
 
         {verificationLinkFailed && !unverified && (
-          <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            That verification link did not work — it may have expired or been
-            used already. Sign in below and we will offer you a new one.
-          </div>
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle />
+            <AlertDescription>
+              That verification link did not work — it may have expired or been
+              used already. Sign in below and we will offer you a new one.
+            </AlertDescription>
+          </Alert>
         )}
 
         {unverified && (
-          <div className="mb-4 grid gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            <p>
-              Confirm {unverified.email} before signing in — the console needs a
-              verified address, and the link is in the message we sent.
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="justify-self-start"
-              disabled={resendVerification.isPending}
-              onClick={() => resendVerification.mutate(unverified.email)}
-            >
-              {resendVerification.isPending
-                ? "Sending..."
-                : "Send a new verification link"}
-            </Button>
-          </div>
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle />
+            <AlertDescription className="grid justify-items-start gap-2">
+              <span>
+                Confirm {unverified.email} before signing in — the console needs
+                a verified address, and the link is in the message we sent.
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={resendVerification.isPending}
+                onClick={() => resendVerification.mutate(unverified.email)}
+              >
+                {resendVerification.isPending && <Spinner data-icon="inline-start" />}
+                Send a new verification link
+              </Button>
+            </AlertDescription>
+          </Alert>
         )}
 
         <form onSubmit={handleSubmit((values) => login.mutate(values))}>
-          <div className="grid gap-6">
+          <FieldGroup>
             <Button
               type="button"
               variant="outline"
@@ -105,41 +120,37 @@ export function LoginForm() {
               disabled={pending}
               onClick={() => googleSignIn.mutate()}
             >
+              {googleSignIn.isPending && <Spinner data-icon="inline-start" />}
               Continue with Google
             </Button>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Or continue with email
-                </span>
-              </div>
-            </div>
+            {/* `FieldSeparator` paints its label `bg-background`; this one sits
+                on a `Card`, which is two steps lighter in dark mode. */}
+            <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+              Or continue with email
+            </FieldSeparator>
 
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+            <Field data-invalid={errors.email ? true : undefined}>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 id="email"
                 type="email"
                 autoComplete="email"
                 placeholder="admin@ragenta.cloud"
                 disabled={pending}
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
                 {...register("email")}
               />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
-            </div>
+              <FieldError id="email-error" errors={[errors.email]} />
+            </Field>
 
-            <div className="grid gap-2">
+            <Field data-invalid={errors.password ? true : undefined}>
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <FieldLabel htmlFor="password">Password</FieldLabel>
                 <Link
                   href="/forgot-password"
-                  className="text-xs text-muted-foreground hover:text-foreground"
+                  className="rounded-sm text-xs text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
                 >
                   Forgot password?
                 </Link>
@@ -149,20 +160,18 @@ export function LoginForm() {
                 type="password"
                 autoComplete="current-password"
                 disabled={pending}
+                aria-invalid={!!errors.password}
+                aria-describedby={errors.password ? "password-error" : undefined}
                 {...register("password")}
               />
-              {errors.password && (
-                <p className="text-sm text-destructive">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
+              <FieldError id="password-error" errors={[errors.password]} />
+            </Field>
 
             <Button type="submit" className="w-full" disabled={pending}>
-              {login.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+              {login.isPending && <Spinner data-icon="inline-start" />}
               Sign in
             </Button>
-          </div>
+          </FieldGroup>
         </form>
       </CardContent>
     </Card>

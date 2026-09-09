@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { DetailSection } from "@/components/detail-shell";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -260,7 +261,8 @@ export function PromoCodeCreateForm() {
 
         <div className="flex justify-end sm:col-span-2">
           <Button type="submit" disabled={create.isPending}>
-            {create.isPending ? "Creating..." : "Create code"}
+            {create.isPending && <Spinner data-icon="inline-start" />}
+            Create code
           </Button>
         </div>
       </form>

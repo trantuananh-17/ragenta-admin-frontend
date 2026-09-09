@@ -1,14 +1,13 @@
-import { AlertCircle, Building2, Loader2 } from "lucide-react";
+import { AlertCircle, Building2 } from "lucide-react";
 
-import { EntityStateView } from "@/components/entity-components";
+import {
+  EntityStateView,
+  EntityTableSkeleton,
+} from "@/components/entity-components";
+import { Spinner } from "@/components/ui/spinner";
 
 export function WorkspacesLoading() {
-  return (
-    <EntityStateView
-      icon={<Loader2 className="size-8 animate-spin text-muted-foreground" />}
-      title="Loading workspaces..."
-    />
-  );
+  return <EntityTableSkeleton columns={5} />;
 }
 
 export function WorkspacesEmpty() {
@@ -34,7 +33,7 @@ export function WorkspacesError() {
 export function WorkspaceDetailLoading() {
   return (
     <div className="flex h-full items-center justify-center">
-      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      <Spinner className="size-8 text-muted-foreground" />
     </div>
   );
 }

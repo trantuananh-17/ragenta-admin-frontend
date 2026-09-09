@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { CheckCircle2, KeyRound, Loader2, XCircle } from "lucide-react";
+import { CheckCircle2, KeyRound, XCircle } from "lucide-react";
 import { z } from "zod";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { formatDateTime } from "@/lib/format";
 import {
   useCheckProvider,
@@ -43,7 +44,7 @@ function LastCheck({ provider }: { provider: ModelProvider }) {
     <p
       className={
         lastCheckOk
-          ? "flex items-start gap-2 text-xs text-emerald-600 dark:text-emerald-400"
+          ? "flex items-start gap-2 text-xs text-success"
           : "flex items-start gap-2 text-xs text-destructive"
       }
     >
@@ -128,7 +129,7 @@ export function ProviderCredentialForm({
                 onClick={() => check.mutate()}
               >
                 {check.isPending && (
-                  <Loader2 className="size-4 animate-spin" />
+                  <Spinner />
                 )}
                 Test connection
               </Button>
@@ -141,7 +142,7 @@ export function ProviderCredentialForm({
                   onClick={() => importModels.mutate()}
                 >
                   {importModels.isPending && (
-                    <Loader2 className="size-4 animate-spin" />
+                    <Spinner />
                   )}
                   Import models
                 </Button>
@@ -209,11 +210,8 @@ export function ProviderCredentialForm({
 
         <div className="flex justify-end sm:col-span-2">
           <Button type="submit" disabled={save.isPending}>
-            {save.isPending
-              ? "Saving..."
-              : credential.configured
-                ? "Replace key"
-                : "Save key"}
+            {save.isPending && <Spinner data-icon="inline-start" />}
+            {credential.configured ? "Replace key" : "Save key"}
           </Button>
         </div>
       </form>

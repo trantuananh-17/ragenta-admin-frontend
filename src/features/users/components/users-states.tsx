@@ -1,14 +1,12 @@
-import { AlertCircle, Loader2, UserCircle } from "lucide-react";
+import { AlertCircle, UserCircle } from "lucide-react";
 
-import { EntityStateView } from "@/components/entity-components";
+import {
+  EntityStateView,
+  EntityTableSkeleton,
+} from "@/components/entity-components";
 
 export function UsersLoading() {
-  return (
-    <EntityStateView
-      icon={<Loader2 className="size-8 animate-spin text-muted-foreground" />}
-      title="Loading accounts..."
-    />
-  );
+  return <EntityTableSkeleton columns={6} />;
 }
 
 export function UsersEmpty() {

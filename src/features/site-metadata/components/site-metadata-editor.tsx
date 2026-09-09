@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 import { DetailSection, DetailShell } from "@/components/detail-shell";
 import { EntityStateView } from "@/components/entity-components";
@@ -10,6 +10,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import {
   usePutSiteMetadata,
   useSiteMetadataSuspense,
@@ -87,7 +88,8 @@ export function SiteMetadataEditor() {
                       })
                     }
                   >
-                    {pending ? "Saving..." : "Save"}
+                    {pending && <Spinner data-icon="inline-start" />}
+                    Save
                   </Button>
                 </div>
 
@@ -107,7 +109,7 @@ export function SiteMetadataEditor() {
 export function SiteMetadataLoading() {
   return (
     <div className="flex h-full items-center justify-center">
-      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      <Spinner className="size-8 text-muted-foreground" />
     </div>
   );
 }

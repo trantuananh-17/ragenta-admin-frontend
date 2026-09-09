@@ -10,6 +10,7 @@ import { LocaleChips } from "@/components/locale-tabs";
 import { PageHeader } from "@/components/page-header";
 import { ContentStatusBadge, StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   useChangelogEntrySuspense,
   useChangelogPublication,
@@ -106,7 +107,8 @@ export function ChangelogDetail({ id }: { id: string }) {
               </Button>
             )}
             <Button size="sm" onClick={save} disabled={busy}>
-              {update.isPending ? "Saving..." : "Save"}
+              {update.isPending && <Spinner data-icon="inline-start" />}
+              Save
             </Button>
           </>
         }

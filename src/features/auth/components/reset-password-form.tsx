@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Loader2 } from "lucide-react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -15,8 +14,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { useResetPassword } from "../hooks/auth.hook";
 
 const schema = z
@@ -74,44 +79,53 @@ export function ResetPasswordForm() {
           onSubmit={handleSubmit((values) =>
             reset.mutate({ token, newPassword: values.newPassword }),
           )}
-          className="grid gap-6"
         >
-          <div className="grid gap-2">
-            <Label htmlFor="newPassword">New password</Label>
-            <Input
-              id="newPassword"
-              type="password"
-              autoComplete="new-password"
-              disabled={reset.isPending}
-              {...register("newPassword")}
-            />
-            {errors.newPassword && (
-              <p className="text-sm text-destructive">
-                {errors.newPassword.message}
-              </p>
-            )}
-          </div>
+          <FieldGroup>
+            <Field data-invalid={errors.newPassword ? true : undefined}>
+              <FieldLabel htmlFor="newPassword">New password</FieldLabel>
+              <Input
+                id="newPassword"
+                type="password"
+                autoComplete="new-password"
+                disabled={reset.isPending}
+                aria-invalid={!!errors.newPassword}
+                aria-describedby={
+                  errors.newPassword ? "newPassword-error" : undefined
+                }
+                {...register("newPassword")}
+              />
+              <FieldError
+                id="newPassword-error"
+                errors={[errors.newPassword]}
+              />
+            </Field>
 
-          <div className="grid gap-2">
-            <Label htmlFor="confirmPassword">Confirm new password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              disabled={reset.isPending}
-              {...register("confirmPassword")}
-            />
-            {errors.confirmPassword && (
-              <p className="text-sm text-destructive">
-                {errors.confirmPassword.message}
-              </p>
-            )}
-          </div>
+            <Field data-invalid={errors.confirmPassword ? true : undefined}>
+              <FieldLabel htmlFor="confirmPassword">
+                Confirm new password
+              </FieldLabel>
+              <Input
+                id="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                disabled={reset.isPending}
+                aria-invalid={!!errors.confirmPassword}
+                aria-describedby={
+                  errors.confirmPassword ? "confirmPassword-error" : undefined
+                }
+                {...register("confirmPassword")}
+              />
+              <FieldError
+                id="confirmPassword-error"
+                errors={[errors.confirmPassword]}
+              />
+            </Field>
 
-          <Button type="submit" className="w-full" disabled={reset.isPending}>
-            {reset.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-            Update password
-          </Button>
+            <Button type="submit" className="w-full" disabled={reset.isPending}>
+              {reset.isPending && <Spinner data-icon="inline-start" />}
+              Update password
+            </Button>
+          </FieldGroup>
         </form>
       </CardContent>
     </Card>

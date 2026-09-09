@@ -1,14 +1,12 @@
-import { AlertCircle, Loader2, ScrollText } from "lucide-react";
+import { AlertCircle, ScrollText } from "lucide-react";
 
-import { EntityStateView } from "@/components/entity-components";
+import {
+  EntityStateView,
+  EntityTableSkeleton,
+} from "@/components/entity-components";
 
 export function AuditLogLoading() {
-  return (
-    <EntityStateView
-      icon={<Loader2 className="size-8 animate-spin text-muted-foreground" />}
-      title="Loading the audit log..."
-    />
-  );
+  return <EntityTableSkeleton columns={6} />;
 }
 
 export function AuditLogEmpty() {

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { useCreateCatalogueItem } from "@/features/catalogue/hooks/catalogue.hook";
 import {
   CatalogueForm,
@@ -37,7 +38,8 @@ export function CatalogueCreate() {
         title="New catalogue item"
         actions={
           <Button onClick={submit} disabled={create.isPending}>
-            {create.isPending ? "Creating..." : "Create item"}
+            {create.isPending && <Spinner data-icon="inline-start" />}
+            Create item
           </Button>
         }
       />

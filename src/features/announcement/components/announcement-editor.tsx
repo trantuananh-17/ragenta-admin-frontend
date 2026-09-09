@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import { DetailSection, DetailShell } from "@/components/detail-shell";
@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import {
   useAnnouncementSuspense,
@@ -110,7 +111,8 @@ export function AnnouncementEditor() {
         }
         actions={
           <Button onClick={submit} disabled={save.isPending}>
-            {save.isPending ? "Saving..." : "Save"}
+            {save.isPending && <Spinner data-icon="inline-start" />}
+            Save
           </Button>
         }
       />
@@ -190,7 +192,7 @@ export function AnnouncementEditor() {
 export function AnnouncementLoading() {
   return (
     <div className="flex h-full items-center justify-center">
-      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      <Spinner className="size-8 text-muted-foreground" />
     </div>
   );
 }

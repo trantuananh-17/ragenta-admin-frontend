@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Loader2 } from "lucide-react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -14,8 +13,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { useRequestPasswordReset } from "../hooks/auth.hook";
 
 const schema = z.object({ email: z.email("Enter a valid email address.") });
@@ -43,34 +48,35 @@ export function ForgotPasswordForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form
-          onSubmit={handleSubmit((values) => request.mutate(values.email))}
-          className="grid gap-6"
-        >
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
+        <form onSubmit={handleSubmit((values) => request.mutate(values.email))}>
+          <FieldGroup>
+            <Field data-invalid={errors.email ? true : undefined}>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                disabled={request.isPending}
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
+                {...register("email")}
+              />
+              <FieldError id="email-error" errors={[errors.email]} />
+            </Field>
+
+            <Button
+              type="submit"
+              className="w-full"
               disabled={request.isPending}
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
-          </div>
+            >
+              {request.isPending && <Spinner data-icon="inline-start" />}
+              Send reset link
+            </Button>
 
-          <Button type="submit" className="w-full" disabled={request.isPending}>
-            {request.isPending && (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            )}
-            Send reset link
-          </Button>
-
-          <Button variant="ghost" asChild className="w-full">
-            <Link href="/login">Back to sign in</Link>
-          </Button>
+            <Button variant="ghost" asChild className="w-full">
+              <Link href="/login">Back to sign in</Link>
+            </Button>
+          </FieldGroup>
         </form>
       </CardContent>
     </Card>

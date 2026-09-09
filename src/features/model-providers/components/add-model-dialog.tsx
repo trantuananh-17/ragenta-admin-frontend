@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -297,7 +298,8 @@ export function AddModelDialog({
             Cancel
           </Button>
           <Button type="submit" form="add-model" disabled={add.isPending}>
-            {add.isPending ? "Adding..." : "Add model"}
+            {add.isPending && <Spinner data-icon="inline-start" />}
+            Add model
           </Button>
         </DialogFooter>
       </DialogContent>

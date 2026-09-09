@@ -121,7 +121,8 @@ export function PlatformRolesDialog({
               save.mutate([...selected], { onSuccess: () => onOpenChange(false) })
             }
           >
-            {save.isPending ? "Saving..." : "Save roles"}
+            {save.isPending && <Spinner data-icon="inline-start" />}
+            Save roles
           </Button>
         </DialogFooter>
       </DialogContent>

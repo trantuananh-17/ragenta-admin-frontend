@@ -6,6 +6,7 @@ import { Lock, Save, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useDeleteRole, useUpdateRole } from "../hooks/roles.hook";
@@ -109,7 +110,8 @@ export function PermissionMatrix({
             }
           >
             <Save className="size-4" />
-            {update.isPending ? "Saving..." : "Save"}
+            {update.isPending && <Spinner data-icon="inline-start" />}
+            Save
           </Button>
         </div>
       </div>
@@ -163,7 +165,7 @@ export function PermissionMatrix({
                         </Label>
                         <p className="text-xs text-muted-foreground">{permission.description}</p>
                         {permission.grantableOn && (
-                          <p className="text-[11px] text-muted-foreground/80">
+                          <p className="text-xs text-muted-foreground/80">
                             Can also be granted on one {permission.grantableOn}.
                           </p>
                         )}

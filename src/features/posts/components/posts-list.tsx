@@ -37,6 +37,7 @@ const columns: ColumnDef<PostRow>[] = [
   },
   {
     accessorKey: "publishedAt",
+    meta: { priority: "secondary" },
     header: "Published",
     cell: ({ row }) => (
       <span className="text-xs text-muted-foreground">
@@ -46,6 +47,7 @@ const columns: ColumnDef<PostRow>[] = [
   },
   {
     accessorKey: "updatedAt",
+    meta: { priority: "tertiary" },
     header: "Last edited",
     cell: ({ row }) => (
       <span className="text-xs text-muted-foreground">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Dialog,
   DialogContent,
@@ -143,7 +144,8 @@ export function NewRoleDialog({
               )
             }
           >
-            {create.isPending ? "Creating..." : "Create role"}
+            {create.isPending && <Spinner data-icon="inline-start" />}
+              Create role
           </Button>
         </DialogFooter>
       </DialogContent>

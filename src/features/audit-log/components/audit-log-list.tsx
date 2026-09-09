@@ -57,6 +57,7 @@ const columns: ColumnDef<AuditEntry>[] = [
   },
   {
     id: "workspace",
+    meta: { priority: "secondary" },
     header: "Workspace",
     cell: ({ row }) =>
       row.original.organizationId ? (
@@ -73,6 +74,7 @@ const columns: ColumnDef<AuditEntry>[] = [
   },
   {
     id: "actor",
+    meta: { priority: "secondary" },
     header: "Actor",
     cell: ({ row }) =>
       row.original.actorId ? (
@@ -89,6 +91,7 @@ const columns: ColumnDef<AuditEntry>[] = [
   },
   {
     id: "target",
+    meta: { priority: "tertiary" },
     header: "Target",
     cell: ({ row }) =>
       row.original.targetType ? (

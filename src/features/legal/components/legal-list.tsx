@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 import { DetailShell } from "@/components/detail-shell";
 import { EntityStateView } from "@/components/entity-components";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { useLegalDocumentsSuspense } from "@/features/legal/hooks/legal.hook";
 import {
   LEGAL_SLUGS,
@@ -71,7 +72,7 @@ export function LegalList() {
 export function LegalLoading() {
   return (
     <div className="flex h-full items-center justify-center">
-      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      <Spinner className="size-8 text-muted-foreground" />
     </div>
   );
 }

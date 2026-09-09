@@ -40,6 +40,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Spinner } from "@/components/ui/spinner";
 import { useLogout } from "@/features/auth/hooks/auth.hook";
 
 type MenuItem = { title: string; icon: typeof BarChart3; url: string };
@@ -50,7 +51,7 @@ type MenuGroup = { label?: string; items: MenuItem[] };
  * data: Platform and Billing are `ragenta-backend`; Landing content is
  * `ragenta-content-backend`.
  */
-const menuGroups: MenuGroup[] = [
+export const menuGroups: MenuGroup[] = [
   {
     items: [{ title: "Dashboard", icon: BarChart3, url: "/admin" }],
   },
@@ -105,8 +106,12 @@ function LogoutButton() {
       disabled={logout.isPending}
       className="h-10 gap-x-4 px-4"
     >
-      <LogOut className="size-4" />
-      <span>{logout.isPending ? "Signing out..." : "Sign out"}</span>
+      {logout.isPending ? (
+        <Spinner className="size-4" />
+      ) : (
+        <LogOut className="size-4" />
+      )}
+      <span>Sign out</span>
     </SidebarMenuButton>
   );
 }
@@ -120,7 +125,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenuItem className="list-none">
           <SidebarMenuButton asChild className="h-10 gap-x-4 px-4">
             <Link href="/admin" prefetch>
-              <span className="flex size-5 shrink-0 items-center justify-center rounded bg-primary text-[11px] font-bold text-primary-foreground">
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
                 R
               </span>
               <span className="text-sm font-semibold">Ragenta Admin</span>

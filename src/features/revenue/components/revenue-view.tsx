@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, Coins, Loader2, Scale, TrendingUp, Wallet } from "lucide-react";
+import { AlertCircle, Coins, Scale, TrendingUp, Wallet } from "lucide-react";
 
 import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { StatCard, StatCardGrid } from "@/components/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -69,9 +70,10 @@ export function RevenueView() {
               <button
                 key={range}
                 type="button"
+                aria-pressed={range === days}
                 onClick={() => setDays(range)}
                 className={cn(
-                  "rounded px-3 py-1 text-sm transition-colors",
+                  "rounded-sm px-3 py-1 text-sm transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
                   range === days
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -306,7 +308,7 @@ export function RevenueLoading() {
         </div>
         <Skeleton className="h-64" />
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
+          <Spinner />
           Working out what came in and what went out...
         </p>
       </div>

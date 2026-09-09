@@ -26,6 +26,7 @@ export const columns: ColumnDef<AdminUser>[] = [
   },
   {
     id: "id",
+    meta: { priority: "tertiary" },
     header: "ID",
     cell: ({ row }) => (
       <div className="flex items-center gap-1">
@@ -38,6 +39,7 @@ export const columns: ColumnDef<AdminUser>[] = [
   },
   {
     id: "role",
+    meta: { priority: "secondary" },
     header: "Role",
     cell: ({ row }) =>
       isPlatformAdmin(row.original) ? (
@@ -62,6 +64,7 @@ export const columns: ColumnDef<AdminUser>[] = [
   },
   {
     accessorKey: "createdAt",
+    meta: { priority: "tertiary" },
     header: "Signed up",
     cell: ({ row }) => (
       <span className="text-xs text-muted-foreground">

@@ -1,11 +1,12 @@
 "use client";
 
-import { AlertCircle, Loader2, Ticket } from "lucide-react";
+import { AlertCircle, Ticket } from "lucide-react";
 
 import { DetailSection, DetailShell } from "@/components/detail-shell";
 import { EntityStateView } from "@/components/entity-components";
 import { PageHeader } from "@/components/page-header";
 import { StatCard, StatCardGrid } from "@/components/stat-card";
+import { Spinner } from "@/components/ui/spinner";
 import { formatCredits } from "@/lib/format";
 import { usePromoCodesSuspense } from "../hooks/promo-codes.hook";
 import { PromoCodeCreateForm } from "./promo-code-create-form";
@@ -76,7 +77,7 @@ export function PromoCodesView() {
 export function PromoCodesLoading() {
   return (
     <div className="flex h-full items-center justify-center">
-      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      <Spinner className="size-8 text-muted-foreground" />
     </div>
   );
 }

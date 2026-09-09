@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { useCreateChangelogEntry } from "@/features/changelog/hooks/changelog.hook";
 import {
   ChangelogForm,
@@ -48,7 +49,8 @@ export function ChangelogCreate() {
         description="Created as a draft. Nothing reaches the site until it is published."
         actions={
           <Button onClick={submit} disabled={create.isPending}>
-            {create.isPending ? "Creating..." : "Create draft"}
+            {create.isPending && <Spinner data-icon="inline-start" />}
+            Create draft
           </Button>
         }
       />

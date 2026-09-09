@@ -6,6 +6,7 @@ import { DetailSection } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
@@ -197,7 +198,7 @@ function CapabilitySection({
               {offered.map((entry) => (
                 <label
                   key={entry.key}
-                  className="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-muted/60"
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted/60"
                 >
                   <Checkbox
                     checked={allowed.includes(entry.key)}
@@ -209,7 +210,7 @@ function CapabilitySection({
                   </span>
                   <Badge
                     variant={entry.tier === "premium" ? "default" : "secondary"}
-                    className="shrink-0 text-[10px]"
+                    className="shrink-0 text-xs"
                   >
                     {entry.tier}
                   </Badge>
@@ -330,7 +331,8 @@ export function PlanModelAccessPanel({
           disabled={!dirty || save.isPending}
           onClick={() => save.mutate(draft)}
         >
-          {save.isPending ? "Saving..." : `Save ${PLAN_LABELS[plan]} access`}
+          {save.isPending && <Spinner data-icon="inline-start" />}
+          {`Save  access`}
         </Button>
       </div>
     </div>

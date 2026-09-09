@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -53,7 +54,7 @@ export function ProviderErrorsView() {
                 type="button"
                 onClick={() => setDays(range)}
                 className={cn(
-                  "rounded px-3 py-1 text-sm transition-colors",
+                  "rounded-sm px-3 py-1 text-sm transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
                   range === days
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -68,7 +69,7 @@ export function ProviderErrorsView() {
 
       {total === 0 ? (
         <div className="mt-6 flex flex-col items-center gap-2 rounded-lg border border-dashed p-10 text-center">
-          <CheckCircle2 className="size-8 text-emerald-600" />
+          <CheckCircle2 className="size-8 text-success" />
           <p className="font-medium">No provider call failed in this range</p>
           <p className="max-w-md text-sm text-muted-foreground">
             Which is what an empty screen means here — nothing is written unless a
@@ -193,7 +194,7 @@ export function ProviderErrorsLoading() {
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-64" />
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
+          <Spinner />
           Loading provider errors...
         </p>
       </div>

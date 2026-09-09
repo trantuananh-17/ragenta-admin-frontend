@@ -33,6 +33,7 @@ export const columns: ColumnDef<AdminWorkspace>[] = [
   },
   {
     id: "subscriptionStatus",
+    meta: { priority: "secondary" },
     header: "Subscription",
     cell: ({ row }) => (
       <SubscriptionStatusBadge status={row.original.subscriptionStatus} />
@@ -40,6 +41,7 @@ export const columns: ColumnDef<AdminWorkspace>[] = [
   },
   {
     id: "credits",
+    meta: { priority: "secondary" },
     header: "Credits",
     cell: ({ row }) => {
       const plan = row.original.planCredits ?? 0;
@@ -56,6 +58,7 @@ export const columns: ColumnDef<AdminWorkspace>[] = [
   },
   {
     accessorKey: "createdAt",
+    meta: { priority: "tertiary" },
     header: "Created",
     cell: ({ row }) => (
       <span className="text-xs text-muted-foreground">

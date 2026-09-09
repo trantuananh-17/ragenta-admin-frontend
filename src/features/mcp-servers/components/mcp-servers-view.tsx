@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, Loader2, Plus, RefreshCw, Server, Trash2 } from "lucide-react";
+import { AlertCircle, Plus, RefreshCw, Server, Trash2, TriangleAlert } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { CopyButton } from "@/components/copy-button";
 import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDateTime } from "@/lib/format";
@@ -202,7 +204,7 @@ function ServerCard({
                 server.allowedTools.includes(tool.name);
               return (
                 <li key={tool.name} className="flex flex-wrap items-start gap-2">
-                  <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+                  <code className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-xs">
                     {toolId(server.slug, tool.name)}
                   </code>
                   <CopyButton value={toolId(server.slug, tool.name)} />
@@ -379,14 +381,17 @@ function ServerForm({ server, onDone }: { server?: McpServer; onDone: () => void
             className="font-mono text-xs"
           />
           {allowedTools.length === 0 ? (
-            <p className="rounded-md border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">
-              Empty means every tool this server advertises — including one it
-              starts advertising later. A server approved for{" "}
-              <code className="font-mono">search_docs</code> that adds{" "}
-              <code className="font-mono">delete_everything</code> would gain that
-              reach with nobody deciding anything. Name the tools unless you control
-              the server.
-            </p>
+            <Alert variant="warning">
+              <TriangleAlert />
+              <AlertDescription>
+                Empty means every tool this server advertises — including one it
+                starts advertising later. A server approved for{" "}
+                <code className="font-mono">search_docs</code> that adds{" "}
+                <code className="font-mono">delete_everything</code> would gain
+                that reach with nobody deciding anything. Name the tools unless
+                you control the server.
+              </AlertDescription>
+            </Alert>
           ) : (
             <p className="text-xs text-muted-foreground">
               Comma separated, by the server&apos;s own tool names. Anything else it
@@ -442,7 +447,8 @@ function ServerForm({ server, onDone }: { server?: McpServer; onDone: () => void
                 )
               }
             >
-              {save.isPending ? "Saving..." : "Save"}
+              {save.isPending && <Spinner data-icon="inline-start" />}
+              Save
             </Button>
           </div>
         </div>
@@ -458,7 +464,7 @@ export function McpServersLoading() {
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-56" />
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
+          <Spinner />
           Loading MCP servers...
         </p>
       </div>

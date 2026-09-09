@@ -40,7 +40,7 @@ export function ProviderList({
         type="button"
         onClick={() => onSelect(null)}
         className={cn(
-          "flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors",
+          "flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
           selection === null
             ? "border-primary/30 bg-primary/10 font-medium text-foreground"
             : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -76,20 +76,20 @@ export function ProviderList({
               type="button"
               onClick={() => onSelect(provider.id)}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors",
+                "flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
                 selection === provider.id
                   ? "bg-primary/10 font-medium text-foreground"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
-              <span className="flex size-6 shrink-0 items-center justify-center rounded bg-muted text-[11px] font-semibold text-foreground">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-semibold text-foreground">
                 {provider.name.slice(0, 1)}
               </span>
               <span className="flex-1 truncate">{provider.name}</span>
               {provider.credential.configured && (
                 <span
                   aria-label="key configured"
-                  className="size-2 shrink-0 rounded-full bg-emerald-500"
+                  className="size-2 shrink-0 rounded-full bg-success"
                 />
               )}
             </button>

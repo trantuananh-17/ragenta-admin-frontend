@@ -1,12 +1,13 @@
 "use client";
 
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 import { DetailSection, DetailShell } from "@/components/detail-shell";
 import { EntityStateView } from "@/components/entity-components";
 import { PageHeader } from "@/components/page-header";
 import { StatCard, StatCardGrid } from "@/components/stat-card";
 import { StatusBadge } from "@/components/status-badge";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -147,7 +148,7 @@ export function PlansView() {
 export function PlansLoading() {
   return (
     <div className="flex h-full items-center justify-center">
-      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      <Spinner className="size-8 text-muted-foreground" />
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import type { ColumnDef } from "@tanstack/react-table";
-import { AlertCircle, Loader2, RotateCcw, ScrollText } from "lucide-react";
+import { AlertCircle, RotateCcw, ScrollText } from "lucide-react";
 
 import { ContentStatusFilter } from "@/components/content-status-filter";
 import {
@@ -12,6 +12,7 @@ import {
   EntityHeader,
   EntityPagination,
   EntityStateView,
+  EntityTableSkeleton,
 } from "@/components/entity-components";
 import { ContentStatusBadge, StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ const columns: ColumnDef<ChangelogRow>[] = [
   },
   {
     accessorKey: "version",
+    meta: { priority: "secondary" },
     header: "Version",
     cell: ({ row }) => (
       <span className="font-mono text-xs">{row.original.version ?? "—"}</span>
@@ -48,6 +50,7 @@ const columns: ColumnDef<ChangelogRow>[] = [
   },
   {
     accessorKey: "updatedAt",
+    meta: { priority: "tertiary" },
     header: "Last edited",
     cell: ({ row }) => (
       <span className="text-xs text-muted-foreground">
@@ -58,12 +61,7 @@ const columns: ColumnDef<ChangelogRow>[] = [
 ];
 
 export function ChangelogLoading() {
-  return (
-    <EntityStateView
-      icon={<Loader2 className="size-8 animate-spin text-muted-foreground" />}
-      title="Loading the changelog..."
-    />
-  );
+  return <EntityTableSkeleton columns={5} />;
 }
 
 export function ChangelogEmpty() {

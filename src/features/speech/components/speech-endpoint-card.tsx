@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { AlertCircle, Trash2 } from "lucide-react";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { StatusBadge } from "@/components/status-badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -106,10 +107,13 @@ export function SpeechEndpointCard({
       )}
 
       {!encryptionConfigured && (
-        <p className="rounded-md bg-destructive/10 p-2.5 text-xs text-destructive">
-          This deployment has no <code>SECRETS_ENCRYPTION_KEY</code>, so no key can
-          be stored. Writing one in the clear is not a fallback.
-        </p>
+        <Alert variant="destructive">
+          <AlertCircle />
+          <AlertDescription>
+            This deployment has no <code>SECRETS_ENCRYPTION_KEY</code>, so no key
+            can be stored. Writing one in the clear is not a fallback.
+          </AlertDescription>
+        </Alert>
       )}
 
       <div className="grid gap-3 sm:grid-cols-2">

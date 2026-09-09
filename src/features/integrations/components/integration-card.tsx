@@ -34,7 +34,7 @@ export function IntegrationCard({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate font-medium">{integration.name}</p>
-          <p className="truncate font-mono text-[11px] text-muted-foreground">
+          <p className="truncate font-mono text-xs text-muted-foreground">
             {integration.id}
           </p>
         </div>
@@ -80,7 +80,7 @@ export function IntegrationCard({
       {integration.lastCheckedAt && (
         <p className="flex items-center gap-1.5 text-xs">
           {integration.lastCheckOk ? (
-            <CheckCircle2 className="size-3.5 text-emerald-600" />
+            <CheckCircle2 className="size-3.5 text-success" />
           ) : (
             <XCircle className="size-3.5 text-destructive" />
           )}

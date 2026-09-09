@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, Loader2, Plus, ShieldCheck } from "lucide-react";
+import { AlertCircle, Plus, ShieldCheck } from "lucide-react";
 
 import { DetailShell } from "@/components/detail-shell";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { usePermissionsSuspense, useRolesSuspense } from "../hooks/roles.hook";
 import { NewRoleDialog } from "./new-role-dialog";
@@ -36,7 +37,7 @@ export function RolesView() {
   const platformRoles = roles.filter((role) => role.scope === "platform");
 
   return (
-    <DetailShell className="flex flex-col overflow-hidden">
+    <DetailShell fill>
       <PageHeader
         title="Roles"
         description="A role is a named set of permissions. Built-in roles come from the release; the ones you create here are yours to compose."
@@ -49,7 +50,7 @@ export function RolesView() {
         }
       />
 
-      <div className="mt-6 grid min-h-0 flex-1 gap-4 lg:grid-cols-[18rem_1fr]">
+      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[18rem_1fr]">
         <nav className="flex flex-col gap-4 overflow-auto">
           <RoleGroup
             title="Workspace"
@@ -119,7 +120,7 @@ function RoleGroup({
               type="button"
               onClick={() => onSelect(role.id)}
               className={cn(
-                "w-full rounded-md border px-3 py-2 text-left transition-colors",
+                "w-full rounded-md border px-3 py-2 text-left transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
                 role.id === selectedId
                   ? "border-primary bg-primary/5"
                   : "border-transparent hover:bg-muted/60",
@@ -151,7 +152,7 @@ export function RolesLoading() {
           <Skeleton className="h-64" />
         </div>
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
+          <Spinner />
           Loading roles...
         </p>
       </div>
