@@ -43,6 +43,18 @@ export const planLimitsSchema = z.object({
   flatCredits: z.number().nullable(),
   topupsEnabled: z.boolean(),
   modelTiers: z.array(z.string()),
+  /**
+   * What the plan unlocks beyond credits. Defaulted so an older backend does not
+   * fail the catalogue — and defaulted to *ungated*, because an API that does not
+   * send these fields is one that does not enforce them, so "unlimited" and
+   * "included" describe what it actually does.
+   */
+  widgetLimit: z.number().nullable().default(null),
+  knowledgeBaseLimit: z.number().nullable().default(null),
+  agentLimit: z.number().nullable().default(null),
+  apiKeysEnabled: z.boolean().default(true),
+  dataSourcesEnabled: z.boolean().default(true),
+  automationEnabled: z.boolean().default(true),
   price: planPriceSchema,
   stripePriceKey: z.string().nullable(),
 });

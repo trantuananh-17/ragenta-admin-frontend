@@ -26,11 +26,30 @@ function priceLabel(plan: PlanEntry): string {
   return "Invoiced by hand";
 }
 
+/**
+ * A plan with neither figure is refilled by nothing, and that is two different
+ * situations an operator has to tell apart: free is funded once by the signup
+ * grant, enterprise by whatever its contract says.
+ */
 function refillLabel(plan: PlanEntry): string {
   if (plan.flatCredits !== null) return `${formatCredits(plan.flatCredits)} flat`;
   if (plan.creditsPerSeat !== null)
     return `${formatCredits(plan.creditsPerSeat)} per seat`;
-  return "One-time grant only";
+  if (plan.price.monthlyUsd === 0) return "Signup grant only";
+  return "By agreement";
+}
+
+/** A counted plan cap. `null` is unlimited, `0` is the capability withheld. */
+function countLabel(limit: number | null): string {
+  return limit === null ? "Unlimited" : String(limit);
+}
+
+function FeatureCell({ included }: { included: boolean }) {
+  return included ? (
+    <StatusBadge tone="success">included</StatusBadge>
+  ) : (
+    <StatusBadge>off</StatusBadge>
+  );
 }
 
 export function PlansView() {
@@ -47,12 +66,7 @@ export function PlansView() {
         <StatCard
           label="Signup grant"
           value={formatCredits(data.signupGrantCredits)}
-          hint="One-time, per account, on the first workspace it creates."
-        />
-        <StatCard
-          label="Free monthly"
-          value={formatCredits(data.freeMonthlyCredits)}
-          hint="Per account, on that same first workspace. A second free workspace gets nothing."
+          hint="The whole of the free tier: once per account, on the first workspace it creates, after email verification. Nothing is granted after it."
         />
         {data.topupPacks.map((pack) => (
           <StatCard
@@ -74,6 +88,12 @@ export function PlansView() {
                 <TableHead>Seats</TableHead>
                 <TableHead>Credits per refill</TableHead>
                 <TableHead>Model tiers</TableHead>
+                <TableHead>Knowledge bases</TableHead>
+                <TableHead>Agents</TableHead>
+                <TableHead>Widgets</TableHead>
+                <TableHead>API keys</TableHead>
+                <TableHead>Data sources</TableHead>
+                <TableHead>Webhooks and triggers</TableHead>
                 <TableHead>Top-ups</TableHead>
                 <TableHead>Self-serve</TableHead>
               </TableRow>
@@ -87,6 +107,18 @@ export function PlansView() {
                   <TableCell>{refillLabel(plan)}</TableCell>
                   <TableCell className="text-xs">
                     {plan.modelTiers.join(", ")}
+                  </TableCell>
+                  <TableCell>{countLabel(plan.knowledgeBaseLimit)}</TableCell>
+                  <TableCell>{countLabel(plan.agentLimit)}</TableCell>
+                  <TableCell>{countLabel(plan.widgetLimit)}</TableCell>
+                  <TableCell>
+                    <FeatureCell included={plan.apiKeysEnabled} />
+                  </TableCell>
+                  <TableCell>
+                    <FeatureCell included={plan.dataSourcesEnabled} />
+                  </TableCell>
+                  <TableCell>
+                    <FeatureCell included={plan.automationEnabled} />
                   </TableCell>
                   <TableCell>
                     {plan.topupsEnabled ? (

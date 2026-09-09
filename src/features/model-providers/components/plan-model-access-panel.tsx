@@ -48,10 +48,19 @@ const CAPABILITIES = [
 
 const PLAN_LABELS: Record<PlanName, string> = {
   free: "Free",
+  starter: "Starter",
   pro: "Pro",
   team: "Team",
   enterprise: "Enterprise",
 };
+
+/**
+ * Plans whose tier rule is economy-only. Duplicated from the backend's plan
+ * catalogue rather than read from `GET /v1/plans`, which this screen does not
+ * load — it only labels the fallback, and getting it wrong misdescribes rather
+ * than misapplies, because the backend is what enforces the tier.
+ */
+const ECONOMY_ONLY_PLANS: readonly PlanName[] = ["free", "starter"];
 
 interface Offered {
   key: string;
@@ -271,8 +280,11 @@ export function PlanModelAccessPanel({
       </Tabs>
 
       {CAPABILITIES.map((capability) => {
-        const fallback =
-          plan === "free" ? "economy models only" : "every offered model";
+        // The tier rule the plan falls back to when nothing is ticked. Free and
+        // starter are both economy-only in the backend's catalogue.
+        const fallback = ECONOMY_ONLY_PLANS.includes(plan)
+          ? "economy models only"
+          : "every offered model";
         const offered = offeredModels(providers, capability.id);
 
         // Rerank is split out rather than branched inside, because it is the one

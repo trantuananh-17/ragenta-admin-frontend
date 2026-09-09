@@ -11,8 +11,11 @@ import { planLimitsSchema } from "@/features/workspaces/service/workspaces.servi
  */
 export const plansResponseSchema = z.object({
   signupGrantCredits: z.number(),
-  /** Defaulted so an older backend does not fail the whole price list. */
-  freeMonthlyCredits: z.number().default(0),
+  /**
+   * `freeMonthlyCredits` is deliberately not read: free has no allowance any
+   * more, so the server sends a permanent 0 that no screen here may present as a
+   * grant. The signup grant is the whole of the free tier.
+   */
   plans: z.array(planLimitsSchema.extend({ name: z.string() })),
   topupPacks: z.array(
     z.object({

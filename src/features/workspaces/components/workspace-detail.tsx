@@ -122,7 +122,12 @@ export function WorkspaceDetail({ workspaceId }: { workspaceId: string }) {
                   ? `${formatCredits(billing.limits.flatCredits)} flat`
                   : billing.limits.creditsPerSeat !== null
                     ? `${formatCredits(billing.limits.creditsPerSeat)} per seat`
-                    : "One-time grant only",
+                    : // Nothing refills this workspace, and the two reasons are
+                      // different: free is funded once by the signup grant,
+                      // enterprise by whatever its contract says.
+                      price.monthlyUsd === 0
+                      ? "Signup grant only"
+                      : "By agreement",
             },
             {
               label: "Next plan reset",
@@ -135,6 +140,33 @@ export function WorkspaceDetail({ workspaceId }: { workspaceId: string }) {
             {
               label: "Model tiers",
               value: billing.limits.modelTiers.join(", "),
+            },
+            {
+              label: "Knowledge bases",
+              value: billing.limits.knowledgeBaseLimit ?? "Unlimited",
+            },
+            { label: "Agents", value: billing.limits.agentLimit ?? "Unlimited" },
+            {
+              label: "Widgets",
+              value: billing.limits.widgetLimit ?? "Unlimited",
+            },
+            {
+              label: "API keys",
+              value: billing.limits.apiKeysEnabled
+                ? "Allowed"
+                : "Not on this plan",
+            },
+            {
+              label: "Data sources",
+              value: billing.limits.dataSourcesEnabled
+                ? "Allowed"
+                : "Not on this plan",
+            },
+            {
+              label: "Webhooks and triggers",
+              value: billing.limits.automationEnabled
+                ? "Allowed"
+                : "Not on this plan",
             },
           ]}
         />

@@ -17,7 +17,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useGoogleSignIn, useLogin } from "../hooks/auth.hook";
+import {
+  EmailNotVerifiedError,
+  useGoogleSignIn,
+  useLogin,
+  useResendVerificationEmail,
+} from "../hooks/auth.hook";
 
 const loginSchema = z.object({
   email: z.email("Enter a valid email address."),
@@ -29,8 +34,15 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export function LoginForm() {
   const login = useLogin();
   const googleSignIn = useGoogleSignIn();
+  const resendVerification = useResendVerificationEmail();
   const searchParams = useSearchParams();
   const notAdmin = searchParams.get("reason") === "not-admin";
+  // A verification link that no longer works comes back here carrying `error`;
+  // a working one signs the account in and never reaches this form.
+  const verificationLinkFailed = searchParams.has("error");
+
+  const unverified =
+    login.error instanceof EmailNotVerifiedError ? login.error : null;
 
   const {
     register,
@@ -53,6 +65,34 @@ export function LoginForm() {
         {notAdmin && (
           <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             That account is signed in but is not a platform administrator.
+          </div>
+        )}
+
+        {verificationLinkFailed && !unverified && (
+          <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            That verification link did not work — it may have expired or been
+            used already. Sign in below and we will offer you a new one.
+          </div>
+        )}
+
+        {unverified && (
+          <div className="mb-4 grid gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <p>
+              Confirm {unverified.email} before signing in — the console needs a
+              verified address, and the link is in the message we sent.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="justify-self-start"
+              disabled={resendVerification.isPending}
+              onClick={() => resendVerification.mutate(unverified.email)}
+            >
+              {resendVerification.isPending
+                ? "Sending..."
+                : "Send a new verification link"}
+            </Button>
           </div>
         )}
 

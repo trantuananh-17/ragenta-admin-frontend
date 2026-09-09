@@ -160,11 +160,24 @@ export const planModelAccessSchema = z.object({
   rerank: capabilityAccessSchema.omit({ default: true }),
 });
 
-export const PLAN_NAMES = ["free", "pro", "team", "enterprise"] as const;
+/**
+ * Ordered cheapest first, mirroring the backend's catalogue. A plan missing here
+ * is stripped out of the map below and gets no tab, which reads on screen as an
+ * empty allowlist — and an empty allowlist is what the backend takes as "nothing
+ * has been said", so it silently falls back to the tier rule.
+ */
+export const PLAN_NAMES = [
+  "free",
+  "starter",
+  "pro",
+  "team",
+  "enterprise",
+] as const;
 export type PlanName = (typeof PLAN_NAMES)[number];
 
 export const planModelAccessMapSchema = z.object({
   free: planModelAccessSchema,
+  starter: planModelAccessSchema,
   pro: planModelAccessSchema,
   team: planModelAccessSchema,
   enterprise: planModelAccessSchema,

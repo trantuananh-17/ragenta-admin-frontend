@@ -1,6 +1,17 @@
 import { StatusBadge } from "@/components/status-badge";
 
-export const PLAN_NAMES = ["free", "pro", "team", "enterprise"] as const;
+/**
+ * Ordered cheapest first, mirroring the backend's catalogue. This is what the
+ * change-plan dialog offers, so a plan missing here is a plan an operator cannot
+ * move a workspace onto.
+ */
+export const PLAN_NAMES = [
+  "free",
+  "starter",
+  "pro",
+  "team",
+  "enterprise",
+] as const;
 export type PlanName = (typeof PLAN_NAMES)[number];
 
 /** Statuses that entitle a workspace to its plan — mirrors the backend's list. */
