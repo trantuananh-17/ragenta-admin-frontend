@@ -43,6 +43,10 @@ export const revenueSchema = z.object({
   }),
   collected: z.object({
     usd: z.number(),
+    /** Split so a month of subscriptions is not confused with a month of top-ups. */
+    subscriptionUsd: z.number().nullish(),
+    topupUsd: z.number().nullish(),
+    payments: z.number().nullish(),
     credits: z.number(),
     purchases: z.number(),
     /** Credits granted as a top-up that match no pack we sell. */

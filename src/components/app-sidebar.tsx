@@ -20,6 +20,7 @@ import {
   Settings2,
   ShieldCheck,
   Sparkles,
+  Receipt,
   Scale,
   Ticket,
   TrendingUp,
@@ -71,6 +72,7 @@ const menuGroups: MenuGroup[] = [
     label: "Billing",
     items: [
       { title: "Revenue", icon: Scale, url: "/admin/revenue" },
+      { title: "Payments", icon: Receipt, url: "/admin/payments" },
       { title: "Usage", icon: TrendingUp, url: "/admin/usage" },
       { title: "Plans", icon: CreditCard, url: "/admin/plans" },
       { title: "Promo codes", icon: Ticket, url: "/admin/promo-codes" },

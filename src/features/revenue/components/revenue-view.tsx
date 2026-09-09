@@ -43,9 +43,13 @@ function usd(value: number): string {
  *
  * The distinction the whole screen is built around: **run rate is a snapshot,
  * collected is a range.** Today's subscriptions bill a certain amount per month
- * whatever window you are looking at; top-ups were bought on particular days.
- * Adding the two would produce a number that means nothing, so they sit in
- * separate cards and only the second is used for the margin.
+ * whatever window you are looking at; payments landed on particular days. Adding
+ * the two would produce a number that means nothing, so they sit in separate
+ * cards and only the second is used for the margin.
+ *
+ * Collected now reads the `payment` rows. It used to infer revenue by matching
+ * top-up credits against the price of the pack that grants that many — a guess
+ * that could never see a subscription charge at all.
  */
 export function RevenueView() {
   const [days, setDays] = useState<number>(30);
@@ -58,7 +62,7 @@ export function RevenueView() {
       <PageHeader
         title="Revenue"
         description="What workspaces pay us, what the providers charge us, and the gap."
-        info="Run rate is what today's active subscriptions bill in a month and does not move with the range. Collected is money that changed hands inside it — top-up packs, the only payment this database records. The margin compares provider cost against collected, never against the run rate."
+        info="Run rate is what today's active subscriptions bill in a month and does not move with the range. Collected is money that changed hands inside it, read from the payment rows themselves rather than inferred from what the credits bought. The margin compares provider cost against collected, never against the run rate."
         actions={
           <div className="flex rounded-md border p-0.5">
             {RANGES.map((range) => (
@@ -91,7 +95,11 @@ export function RevenueView() {
           <StatCard
             label="Collected in range"
             value={usd(data.collected.usd)}
-            hint={`${data.collected.purchases} top-up purchases`}
+            hint={
+              data.collected.payments
+                ? `${data.collected.payments} payments — ${usd(data.collected.subscriptionUsd ?? 0)} subscriptions, ${usd(data.collected.topupUsd ?? 0)} top-ups`
+                : "No payment recorded in this range"
+            }
             icon={<Coins className="size-4" />}
           />
           <StatCard
@@ -232,9 +240,9 @@ function Caveats({ revenue }: { revenue: Revenue }) {
     );
   }
 
-  if (revenue.collected.unpricedCredits > 0) {
+  if (revenue.collected.usd === 0 && revenue.collected.credits > 0) {
     notes.push(
-      `${Math.round(revenue.collected.unpricedCredits).toLocaleString("en")} credits arrived as a top-up matching no pack we sell. They are counted as no revenue rather than guessed at.`,
+      `${Math.round(revenue.collected.credits).toLocaleString("en")} top-up credits were granted in this range with no payment recorded against them — either they predate the payments table or they were granted by hand. They count as no revenue rather than being valued at a guess.`,
     );
   }
 
