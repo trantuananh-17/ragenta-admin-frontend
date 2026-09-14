@@ -33,6 +33,8 @@ export const integrationSchema = z.object({
   secretHint: z.string().nullable(),
   authHeader: z.string().nullable(),
   authPrefix: z.string().default(""),
+  /** `Name → value`; a value may carry `{{visitor.id}}` / `{{visitor.email}}`. */
+  extraHeaders: z.record(z.string(), z.string()).default({}),
   allowedMethods: z.array(z.string()).default([]),
   allowedPathPrefix: z.string().default(""),
   allowedRecipients: z.array(z.string()).default([]),
@@ -55,6 +57,7 @@ export interface SaveIntegrationInput {
   secret?: string;
   authHeader?: string | null;
   authPrefix?: string;
+  extraHeaders?: Record<string, string>;
   allowedMethods: string[];
   allowedPathPrefix?: string;
   allowedRecipients?: string[];
@@ -80,6 +83,7 @@ export async function saveIntegration(
       ...(input.secret ? { secret: input.secret } : {}),
       authHeader: input.authHeader ?? null,
       authPrefix: input.authPrefix ?? "",
+      extraHeaders: input.extraHeaders ?? {},
       allowedMethods: input.allowedMethods,
       allowedPathPrefix: input.allowedPathPrefix ?? "",
       allowedRecipients: input.allowedRecipients ?? [],

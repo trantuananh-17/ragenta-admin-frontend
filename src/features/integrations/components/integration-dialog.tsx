@@ -39,6 +39,8 @@ interface FormState {
   secret: string;
   authHeader: string;
   authPrefix: string;
+  /** `Name: value` per line, as typed. */
+  extraHeaders: string;
   allowedMethods: string[];
   allowedPathPrefix: string;
   allowedRecipients: string;
@@ -54,6 +56,7 @@ const BLANK: FormState = {
   secret: "",
   authHeader: "Authorization",
   authPrefix: "Bearer ",
+  extraHeaders: "",
   allowedMethods: ["GET"],
   allowedPathPrefix: "",
   allowedRecipients: "",
@@ -79,10 +82,24 @@ function initialState(integration: Integration | null): FormState {
     secret: "",
     authHeader: integration.authHeader ?? "",
     authPrefix: integration.authPrefix,
+    extraHeaders: Object.entries(integration.extraHeaders)
+      .map(([name, value]) => `${name}: ${value}`)
+      .join("\n"),
     allowedMethods: integration.allowedMethods,
     allowedPathPrefix: integration.allowedPathPrefix,
     allowedRecipients: integration.allowedRecipients.join("\n"),
   };
+}
+
+function parseHeaders(text: string): Record<string, string> {
+  const headers: Record<string, string> = {};
+  for (const line of text.split("\n")) {
+    const at = line.indexOf(":");
+    if (at === -1) continue;
+    const name = line.slice(0, at).trim();
+    if (name) headers[name] = line.slice(at + 1).trim();
+  }
+  return headers;
 }
 
 /**
@@ -155,6 +172,7 @@ function IntegrationForm({
           ...(form.secret.trim() ? { secret: form.secret.trim() } : {}),
           authHeader: form.authHeader.trim() || null,
           authPrefix: form.authPrefix,
+          extraHeaders: parseHeaders(form.extraHeaders),
           allowedMethods: form.allowedMethods,
           allowedPathPrefix: form.allowedPathPrefix.trim(),
           allowedRecipients: form.allowedRecipients
@@ -328,6 +346,23 @@ function IntegrationForm({
               <p className="text-xs text-muted-foreground">
                 A connection with only GET stays read-only however the agent is
                 talked to.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="integration-headers">Extra headers</Label>
+              <Textarea
+                id="integration-headers"
+                rows={3}
+                placeholder={"X-User-Id: {{visitor.id}}"}
+                value={form.extraHeaders}
+                onChange={(event) => set("extraHeaders", event.target.value)}
+                className="font-mono text-xs"
+              />
+              <p className="text-xs text-muted-foreground">
+                One <code>Name: value</code> per line.{" "}
+                <code>{"{{visitor.id}}"}</code> and <code>{"{{visitor.email}}"}</code>{" "}
+                are filled from an embedded chat&apos;s signed-in visitor.
               </p>
             </div>
 
